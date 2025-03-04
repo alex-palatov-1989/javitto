@@ -67,7 +67,7 @@ public class CommandExecutor implements Runnable{
             final List<Command> done = new ArrayList<>();
             while( running ){                                
                 
-                if( awaiting.isEmpty() )    Thread.sleep(0, 750);
+                if( awaiting.isEmpty() )    Thread.sleep(0, 999);
                 else try {                        
                     Object[] exe;   
                     synchronized (awaiting) {                                           
@@ -95,13 +95,15 @@ public class CommandExecutor implements Runnable{
             synchronized (awaiting) {
                 awaiting.forEach(runner::submit);
             }
+            cache.api().commit();
             stop();
         }        
     }
     /*  =================================================================  */
     public  void stop(){ 
-        running=false;         
+        running=false;
         try {
+            Thread.sleep(999);
             daemon.shutdown();  var main = daemon.awaitTermination(1, TimeUnit.SECONDS);
             runner.shutdown();  var fibs = runner.awaitTermination(1, TimeUnit.SECONDS);
             if(!main)daemon.shutdownNow();

@@ -1,14 +1,9 @@
 package com.solar.academy.database;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.Arrays;
 
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
@@ -29,9 +24,9 @@ import com.solar.academy.models.BaseID;
 public class RocksImplementation implements IQuerySide, ICommandSide{
 
     private final ObjectMapper objMapper = new ObjectMapper();    
-    private HashMap<String,ColumnFamilyHandle> mapped;
-    private RocksDB _db; 
-    private WriteOptions writeSinc = new WriteOptions();
+    private final HashMap<String,ColumnFamilyHandle> mapped;
+    private final RocksDB _db;
+    private final WriteOptions writeSinc = new WriteOptions();
     public RocksImplementation(RocksDB db, HashMap<String,ColumnFamilyHandle> map)
     {   
         _db = db; mapped = map; 
@@ -56,7 +51,7 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
     public String get(String key) throws Exception {
         synchronized (_db) {
             final var k = key.getBytes();
-            final var v = _db.get(key.getBytes());
+            final var v = _db.get(k);
             return v==null ? null : new String(v);            
         }        
     }
@@ -89,7 +84,7 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
             it.next();            
             return record;
         })        
-        .takeWhile( e-> e!=null ).filter( e-> ((Entry<T>) e).data!=null ) 
+        .takeWhile(Objects::nonNull).filter(e-> e.data!=null )
         .onClose( ()->{ it.close();snap.close(); } );
     }  
     public <T> HashMap<Integer, T> getAll (Class<T> clazz) throws Exception {    
@@ -109,8 +104,7 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
         ) throws Exception {
         return filter(
                 clazz, field, value, 
-                (IQuerySide.Predicate)
-                (lhs, rhs)->lhs.equals(rhs),
+                Object::equals,
                 skipKeys
             );
     }
@@ -139,7 +133,7 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
                 try {    return pred.filter(get.invoke(element.data, (Object[])null), value);                    
                 }   catch (Exception e) {   return false;   }                                                         
             }
-        ).collect(  Collectors.toMap(e->(Integer)e.key, e->(T)e.data)    );        
+        ).collect(  Collectors.toMap(e->e.key, e->e.data)    );
     }    
     
     /*  =================================================================  */    
@@ -190,11 +184,11 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
                 value = _db.multiGetAsList( rd, tables, keys );    
             }   
         final var end = gc.freeMemory();    if( gc.freeMemory()<=start - end )  
-        { gc.gc();  System.err.println("\nGC!\n"+Thread.currentThread().getStackTrace()); }         
+        { gc.gc();  System.err.println("\nGC!\n"+ Arrays.toString(Thread.currentThread().getStackTrace())); }
         
-        return value.parallelStream().filter( e->e!=null )
-                    .map( e-> (T) fromJSON( (byte[]) e, clazz) )
-                    .filter( e->e!=null ).toList();                    
+        return value.parallelStream().filter(Objects::nonNull)
+                    .map( e-> (T) fromJSON(e, clazz) )
+                    .filter(Objects::nonNull).toList();
     } 
     /*  =================================================================  */
     private final WriteBatch writeBatch = new WriteBatch();    
@@ -306,7 +300,7 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
         }
     }
     public void delete (String key, Class<?> clazz) throws Exception { 
-        try {Ц
+        try {
             synchronized (_db){ _db.delete( getTable(clazz.getName()), key.getBytes()); }   
         } catch (RocksDBException e) { e.printStackTrace(); throw e;
         }

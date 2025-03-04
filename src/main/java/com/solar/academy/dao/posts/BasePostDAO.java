@@ -16,11 +16,7 @@ public class BasePostDAO {
     static Cache  db;
 
     @SuppressWarnings("unchecked")
-    class FullPostDAO implements BaseDAO {                 
-        @Override
-        public Class<?> dataclass() {
-            return FullPost.class;
-        }
+    abstract class FullPostDAO implements BaseDAO {
         public HashMap<Integer, ? extends BasePost>  getByTag(String tag, Class clazz, Set<Integer> skip) throws Exception{
             return db.api().filter(   clazz, 
                 "category",     tag,    containStr, skip
@@ -56,6 +52,7 @@ public class BasePostDAO {
         public UserPost  get (String key)   throws Exception{
             return read( key, db );    
         }
+        @Override
         public Class<UserPost> dataclass(){ return UserPost.class; }
     }    
     class MarketPostDAO extends FullPostDAO { 
@@ -68,6 +65,7 @@ public class BasePostDAO {
         public UserPost  get (String key)   throws Exception{
             return read( key, db );    
         }
+        @Override
         public Class<MarketPost> dataclass(){ return MarketPost.class; }
     }
 

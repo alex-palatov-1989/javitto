@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,7 +37,7 @@ public interface BaseDAO{
                                 (item)->{
                                     try {
                                         final var rec = (BaseID)item;
-                                        db.api().putId( key+rec.getKey(), item );
+                                        db.executor().put( key+rec.getKey(), item );
                                     } catch (Exception e) { e.printStackTrace();
                                     }
                                 });                            
@@ -49,7 +50,7 @@ public interface BaseDAO{
                     }
                 }
             );          
-            db.api().putId(key,value);
+            db.executor().put(key,value);
             if(err[0]!=null)throw err[0];            
         } catch (Exception e) { System.err.println(e.getMessage()); throw e;
         }
@@ -87,14 +88,15 @@ public interface BaseDAO{
                     }
                 }
             );                        
-            var added = fibers.filter( e->e!=null ).flatMap( fib->fib )
-                .map( (fib)-> {  try { 
+            var added = fibers.flatMap(fib->fib ).filter(Objects::nonNull)
+                .map( (fib)-> {
+                    try {
                       return((CompletableFuture<?>) fib).get();
                     } catch ( Exception e ) { e.printStackTrace(); return null; } 
-                    }).filter( e->e!=null ) .collect(Collectors.joining("::"));
+                    }).collect(Collectors.joining("::"));
             
             var having = db.api().get(key);
-            if( having==null ) having = new String();
+            if( having==null ) having = "";
             db.executor().put( key, having+added );
             db.executor().put( key, value );
                                 
@@ -112,17 +114,18 @@ public interface BaseDAO{
 
         try {            
             var data  = (T)db.api().get(key, dataclass());
-            if( data != null && data instanceof T)
+            if( data != null )
                 colls.parallelStream().forEach(
                     (g)->{
                         try {      
                             if(g.field.isAnnotationPresent(IRelative.ToList.class))    
                             {
-                                final var list = (List<?>)db.api().getPrivate(key, g.getParam());    
-                                if( list==null ) 
-                                g.field.set(data, new ArrayList<>());
-                                else
-                                g.field.set(data, list);
+                                final var list = (List<?>)db.api().getPrivate(key, g.getParam());
+                                if ((list == null)) {
+                                    g.field.set(data, new ArrayList<>());
+                                } else {
+                                    g.field.set(data, list);
+                                }
                             }                                                                                                                                                                                             
                         } catch (Exception e) {                             
                             err[0] = e;
@@ -141,8 +144,7 @@ public interface BaseDAO{
     }    
 
     default List<Generic> createMap(){
-        List<Generic> colls = new ArrayList<>();
-        try {         
+        try {
             HashMap<String, Field> recursive = new HashMap<>();
             var clazz = dataclass();
             while( !clazz.equals(Object.class) )
@@ -152,31 +154,28 @@ public interface BaseDAO{
                     .filter(
                         f->f.getAnnotations().length!=0
                     ).collect( Collectors.toMap
-                        ( e->e.getName(), e->(Field)e )
+                        (Field::getName, e->e )
                     )                                       
                 );                
                 clazz=clazz.getSuperclass();
-            }     
-            var all = recursive.values().stream();
-
-            colls = all.filter(
-                f ->    f.isAnnotationPresent(IRelative.ToList.class) 
-                    ||  f.isAnnotationPresent(IRelative.NoVal.class)
+            }
+            return recursive.values().stream().filter(
+                f ->    f.isAnnotationPresent(IRelative.ToList.class)
+                        ||   f.isAnnotationPresent(IRelative.NoVal.class)
             ).peek(
                 f ->    f.setAccessible(true) 
             ).map( f-> new Generic(f, f.getType(), f.getGenericType()) )
             .toList();
             
-            return colls;
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }   return null;
     }
 
     @AllArgsConstructor
-    static class Generic{
+    class Generic{
         public Field             field;
-        public Class             clazz;
+        public Class<?>          clazz;
         private Type              type;
         public Class<?> getParam(){ 
             try {
