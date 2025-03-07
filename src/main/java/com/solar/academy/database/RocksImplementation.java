@@ -312,7 +312,7 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
             hsh = get(hshKey);
             if( hsh!=null ){
                 var upd = Arrays.asList( hsh.split("::") ).parallelStream()
-                    .filter( k->k.contains(key) ).collect(Collectors.joining("::"));
+                    .filter( k->!k.contains(key) ).collect(Collectors.joining("::"));
                 put(hshKey, upd);
             }            
             var table = getTable( clazz.getName() );
