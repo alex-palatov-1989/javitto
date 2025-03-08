@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.solar.academy.models.messages.StringMsg;
 
-public interface IMessagingDAO {
+public interface IMessageDAO {
 
     public List<?> getByPost(String postID) throws Exception;
 

@@ -1,7 +1,8 @@
 package com.solar.academy.database;
 
-import com.solar.academy.dao.BaseDAO;
-import com.solar.academy.dao.TMP;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.solar.academy.models.posts.UserPost;
 import lombok.Getter;
 
 import org.rocksdb.*;
@@ -16,8 +17,9 @@ import java.util.stream.Stream;
 
 public class Cache implements AutoCloseable{
     @Override public void close(){
-        executor.stop(); memory = null;
+        db.close();
         mapped.values().forEach(ColumnFamilyHandle::close);
+        executor.stop(); memory = null;
     }
     private final String         DB_PATH     = "/tmp/rocksdb";
     private final Options        deflt       = new Options();
@@ -89,16 +91,26 @@ public class Cache implements AutoCloseable{
         private CommandExecutor          executor;
         private HashMap< String,Method > commands;    
     /*  =======================================  */
-    public static void main(String[] args) {
-        try (Cache db = new Cache();){
 
+
+    public static void main(String[] args) {
+        try {
+            var mapper = new ObjectMapper();
+            var userP  = new UserPost();
+            System.out.println(mapper.writeValueAsString(userP));
+        } catch (JsonProcessingException e){ e.printStackTrace();}
+
+
+
+        /*
+        try (Cache db = new Cache();){
             var dao = new BaseDAO(){
                 @Override
                 public Class<?> dataclass(){ return TMP.class; }
             };
             var i=0;    var N = 33;     String key = null;
             List <String> keys = new ArrayList<>();
-            List<TMP> el = new ArrayList<>();
+            List <TMP> el = new ArrayList<>();
             var  foo = new  TMP();
 
             var start = System.currentTimeMillis();
@@ -144,6 +156,7 @@ public class Cache implements AutoCloseable{
             System.out.println("\n\t\tEND");
         } catch (Exception e) { e.printStackTrace();
         }
+        */
     }
 }
 

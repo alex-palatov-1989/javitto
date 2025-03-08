@@ -1,82 +1,71 @@
 package com.solar.academy.dao.posts;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
+
+import com.solar.academy.dao.AbstractDAO;
+import com.solar.academy.database.Cache;
+import com.solar.academy.database.IQuerySide;
 import com.solar.academy.models.posts.BasePost;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.solar.academy.models.posts.MarketPost;
+import com.solar.academy.models.posts.UserPost;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class PostDAO extends BasePostDAO implements IPostDAO{
-        
-    @Getter final UserPostDAO      userDAO    = new UserPostDAO();
-    @Getter final MarketPostDAO    goodDAO    = new MarketPostDAO();    
+abstract public class PostDAO {
+    abstract Cache db();
 
-    
-    @NoArgsConstructor
-    class SearchFlags{
-        public boolean  byCat, byText, byHead = true;
-        public boolean  inUsers   = true;
-        public boolean  onMarket  = true; 
+    @SuppressWarnings("unchecked")
+    abstract class FullPostDAO implements AbstractDAO {
+        public HashMap<Integer, ? extends BasePost>  getByTag(String tag, Class clazz, Set<Integer> skip) throws Exception{
+            return db().api().filter(   clazz, 
+                "category",     tag,    containStr, skip
+            );
+        }        
+        public HashMap<Integer, ? extends BasePost>  getByHeader(String tag, Class clazz, Set<Integer> skip) throws Exception{
+            return db().api().filter(   clazz, 
+                "header",       tag,    containStr, skip    
+            );
+        }    
+        public HashMap<Integer, ? extends  BasePost>  getByText(String tag, Class clazz, Set<Integer> skip) throws Exception{
+            return db().api().filter(   clazz, 
+                "description",  tag,    containStr, skip
+            );
+        }                
+    }            
+
+    final class UserPostDAO extends FullPostDAO implements IPostDAO<UserPost>{
+        public void     edit (UserPost post, String key) throws Exception {
+            write( key, post, db() );
+        }
+        public String   create  (UserPost post)          throws Exception{
+            return create( post, db() );    
+        }
+        public UserPost  get (String key)   throws Exception{
+            return read( key, db() );    
+        }
+        @Override
+        public Class<UserPost> dataclass(){ return UserPost.class; }
     }
-    public SearchFlags     getFlags() { return new SearchFlags(); }
-
-    
-    public List<BasePost>  defaultSearch(String tag)
-    {
-        return findText(tag, getFlags());
-    }
-    public List<BasePost>  searchCategory(String tag)
-    {
-        var cat = getFlags(); cat.byCat=true; cat.byHead = false;
-        return findText( tag, cat );
-    }
-    public List<BasePost>  searchInUsers(String tag)
-    {
-        var cat = getFlags(); cat.byCat=true; cat.onMarket = false;
-        return findText( tag, cat );
-    }
-    public List<BasePost>  searchOnMarket(String tag)
-    {
-        var cat = getFlags(); cat.byCat=true; cat.inUsers = false;
-        return findText( tag, cat );
+    final class MarketPostDAO extends FullPostDAO implements  IPostDAO<MarketPost>{
+        public void     edit (MarketPost post, String key) throws Exception{ 
+            write( key, post, db());    
+        }
+        public String    create (MarketPost post)          throws Exception{
+            return create( post, db());    
+        }
+        public MarketPost  get (String key)   throws Exception{
+            return read( key, db() );    
+        }
+        @Override
+        public Class<MarketPost> dataclass(){ return MarketPost.class; }
     }
 
-
-    public List<BasePost>  findText(String tag, SearchFlags flags){
-        var search = new HashMap<Integer, BasePost>();            
-        var ret = new ArrayList<BasePost>();      
-
-        try {
-            var skip = new HashSet<Integer>();
-            if(flags.inUsers){      
-                if(flags.byHead)    search.putAll(userDAO.getByHeader (tag, userDAO.dataclass(), null));    
-                skip.addAll(search.keySet());
-
-                if(flags.byCat)     search.putAll(userDAO.getByTag     (tag, userDAO.dataclass(), skip));
-                skip.addAll(search.keySet());
-
-                if(flags.byText)    search.putAll(userDAO.getByText    (tag, userDAO.dataclass(), skip));
-                skip.clear();
-
-            ret.addAll(search.values());
-            }
-            if(flags.onMarket){     
-                if(flags.byHead)    search.putAll(goodDAO.getByHeader  (tag, goodDAO.dataclass(), null));
-                skip.addAll(search.keySet());
-
-                if(flags.byCat)    search.putAll(goodDAO.getByTag      (tag, goodDAO.dataclass(), skip));
-                skip.addAll(search.keySet());
-                
-                if(flags.byText)   search.putAll(goodDAO.getByText     (tag, goodDAO.dataclass(), skip));
-                skip.clear();
-
-            ret.addAll(search.values());
-            }            
-        } catch   ( Exception e  ) {     e.printStackTrace();
-        } finally { System.gc(); }           
-        return ret;
-    }      
-
+    final class FilterString implements IQuerySide.Predicate{
+        @Override public
+        boolean filter(Object rec, Object  arg){
+            String val = (String) rec;
+            return val.contains((String)arg);
+        }
+    }
+    final FilterString     containStr = new FilterString();
 }

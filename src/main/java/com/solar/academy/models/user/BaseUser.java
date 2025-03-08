@@ -1,17 +1,13 @@
 package com.solar.academy.models.user;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.Data;
 import java.util.List;
 
 import com.solar.academy.dao.IRelative;
 import com.solar.academy.models.BaseID;
 import com.solar.academy.models.messages.Message;
 
-@Getter @Setter
-@NoArgsConstructor
+@Data
 public class BaseUser extends BaseID{
 
     @IRelative.ToList

@@ -2,7 +2,6 @@ package com.solar.academy.database;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -37,7 +36,7 @@ public class CommandExecutor implements Runnable{
     }
 
     Future<Object> addExec(ICommandSide.COMMAND task, Object... args){
-        var cmd = new Command( task, args);
+        var cmd = new Command( task, args );
         synchronized (awaiting) {
             awaiting.add(cmd);
         }

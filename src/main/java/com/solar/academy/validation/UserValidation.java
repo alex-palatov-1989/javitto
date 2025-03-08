@@ -2,8 +2,6 @@ package com.solar.academy.validation;
 import com.solar.academy.UserController;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 public class UserValidation implements Validation {

@@ -10,7 +10,6 @@ import lombok.Setter;
 public class Message extends StringMsg{
 
     public BaseID photo;
-    
 }   // msg is private to user
     // its relative to,
     // sender Id inside BaseMsg

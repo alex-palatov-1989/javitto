@@ -16,7 +16,7 @@ import com.solar.academy.database.Cache;
 import com.solar.academy.models.BaseID;
 import lombok.AllArgsConstructor;
 
-public interface BaseDAO{
+public interface AbstractDAO {
 
     public Class<?> dataclass();
 

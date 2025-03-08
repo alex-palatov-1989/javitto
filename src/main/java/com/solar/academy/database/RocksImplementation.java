@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ReadOptions;
@@ -23,21 +24,21 @@ import com.solar.academy.models.BaseID;
 
 public class RocksImplementation implements IQuerySide, ICommandSide{
 
-    private final ObjectMapper objMapper = new ObjectMapper();    
     private final HashMap<String,ColumnFamilyHandle> mapped;
     private final RocksDB _db;
     private final WriteOptions writeSinc = new WriteOptions();
     public RocksImplementation(RocksDB db, HashMap<String,ColumnFamilyHandle> map)
     {   
         _db = db; mapped = map; 
-        writeSinc.setSync(false);               
+        writeSinc.setSync(false);
     }
     /*  =================================================================  */
+    private final ObjectMapper objMapper = new ObjectMapper();
     private <T> byte[] toJSON(T obj) {
         try {
             return objMapper.writeValueAsString(obj).getBytes();
         } catch (JsonProcessingException e) {
-            e.printStackTrace();return null; 
+            e.printStackTrace();return null;
         }
     }
     private <T> T fromJSON(byte[] json, Class<T> clazz) {
@@ -45,9 +46,10 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
             if (json==null)return null;
             return objMapper.readValue(new String(json), clazz);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();return null; 
+            e.printStackTrace();return null;
         }
-    }  
+    }
+    /*  =================================================================  */
     public String get(String key) throws Exception {
         synchronized (_db) {
             final var k = key.getBytes();
