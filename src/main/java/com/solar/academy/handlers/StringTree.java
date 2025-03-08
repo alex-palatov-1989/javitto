@@ -8,36 +8,33 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.stream.Stream;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-abstract class StringTree {
+
+@NoArgsConstructor
+class StringTree {
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface Leaf{}    
 
     protected String id;
-    protected HashMap<String, StringTree> children;    
-    protected StringTree parent;
 
-    public HashMap<String, StringTree> getChildren() {
-        return children;
-    }
-    public StringTree getParent() {
-        return parent;
-    }
-    public boolean hasChild() {
-        return !children.isEmpty();
-    }
-    public void setParent(StringTree parent) {
-        this.parent = parent;
-    }
+    @Getter @Setter
+    protected StringTree parent;
+    @Getter protected HashMap<String, StringTree> children;
+
     protected StringTree(String id) {
         this.id         = id;
         this.children   = new HashMap<>();
         this.parent     = null;
     }
     public String tag(){ return id; }
+
+
     private
     Stream<Field> getLeafs(){
         return 

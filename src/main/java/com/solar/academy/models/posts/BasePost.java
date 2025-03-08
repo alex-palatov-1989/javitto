@@ -10,7 +10,7 @@ import lombok.Setter;
 public class BasePost extends BaseID{    
     
     public String mainImg;
-    public BaseID autorID;
+    public String autorID;
 
     public String   header;
     public String    price;    

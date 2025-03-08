@@ -6,27 +6,26 @@ import lombok.Data;
 
 @Data
 public class BaseID {
-    public Integer key = 0;
-    public Integer host= 0;
-    public Integer getID()    { return key; }
-    public Integer getOwner() { return host; }
+    public Integer id  =0;
+    public Integer host=0;
 
-    @JsonIgnore     public  String  getKey()      { return Integer.toHexString(key); }
-    @JsonIgnore     public  String  getHost()     { return Integer.toHexString(host);}
+    public  String  getKey()    { return Integer.toHexString(id); }
+    public  String  getOwner()  { return Integer.toHexString(host);}
 
-    @JsonIgnore     public BaseID setKey(Integer i) {
-        key = i;    return this;
+    public BaseID setKey(Integer i) {
+        id = i;    return this;
     }
-    @JsonIgnore     public BaseID setHost(Integer i) {
+    public BaseID setOwner(Integer i) {
         host = i;   return this;
     }
+
     @JsonIgnore     public BaseID setHost(String str)
     {
         host = Integer.parseUnsignedInt(str, 16);
         return this;
     }
     @JsonIgnore     public BaseID setKey(String str) {
-        key = Integer.parseUnsignedInt(str, 16);
+        id = Integer.parseUnsignedInt(str, 16);
         return this;
     }
 }

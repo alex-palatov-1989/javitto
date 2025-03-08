@@ -1,5 +1,9 @@
 package com.solar.academy.handlers;
 
+
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class Category extends StringTree{
 
     private static final String   ROOT = new String("root");

@@ -2,6 +2,7 @@ package com.solar.academy.database;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.solar.academy.models.posts.MarketPost;
 import com.solar.academy.models.posts.UserPost;
 import lombok.Getter;
 
@@ -96,7 +97,7 @@ public class Cache implements AutoCloseable{
     public static void main(String[] args) {
         try {
             var mapper = new ObjectMapper();
-            var userP  = new UserPost();
+            var userP  = new MarketPost();
             System.out.println(mapper.writeValueAsString(userP));
         } catch (JsonProcessingException e){ e.printStackTrace();}
 

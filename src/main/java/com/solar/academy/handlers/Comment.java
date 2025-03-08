@@ -1,16 +1,23 @@
 package com.solar.academy.handlers;
 
+import lombok.NoArgsConstructor;
+import netscape.javascript.JSObject;
+import org.json.JSONObject;
+
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+@NoArgsConstructor
 public class Comment extends StringTree {
     
     @Leaf private String sender; 
     @Leaf private String text;
-    static Set<Integer> idxs = new HashSet<>();
+    final Set<Integer> idxs = new HashSet<>();
+    static int getRnd(){ return Math.abs(UUID.randomUUID().hashCode()); }
 
-    public Comment(int id, String sender, String text) {
+    Comment(int id, String sender, String text) {
         super( String.valueOf(id) );
         this.sender = sender;
         this.text = text;
@@ -18,7 +25,7 @@ public class Comment extends StringTree {
     public Comment addChild(String sender, String text) {
         Integer id;
         synchronized( idxs ){            
-            do id = Math.abs(UUID.randomUUID().hashCode());
+            do id = getRnd();
             while( idxs.contains(id) );            
             idxs.add(id);
         }
@@ -30,11 +37,12 @@ public class Comment extends StringTree {
     public Comment findById(String id) {
         if( this.id.equals(id) ){
             return this;
-        } else
-        return children.values().stream()
-            .map(child -> ((Comment)child).findById(id))
-            .filter( find->find!=null )
-            .findFirst().orElse( null );
+        } else {
+            return children.values().stream()
+                    .map(child -> ((Comment)child).findById(id))
+                    .filter(Objects::nonNull)
+                    .findFirst().orElse( null );
+        }
     }
     public void deleteByid(String id) {
 
