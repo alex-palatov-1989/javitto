@@ -1,5 +1,6 @@
 package com.solar.academy.database;
 
+import java.io.*;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,9 +19,7 @@ import org.rocksdb.WriteOptions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.solar.academy.models.BaseID;
-
 
 public class RocksImplementation implements IQuerySide, ICommandSide{
 
@@ -36,31 +35,95 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
     private final ObjectMapper objMapper = new ObjectMapper();
     private <T> byte[] toJSON(T obj) {
         try {
-            return objMapper.writeValueAsString(obj).getBytes();
+            var str = objMapper.writeValueAsString(obj);
+            return str.getBytes();
         } catch (JsonProcessingException e) {
             e.printStackTrace();return null;
-        }
+        }/*
+        try(
+                var byteOut = new ByteArrayOutputStream();
+                var out = new ObjectOutputStream(byteOut)
+        ){
+            out.writeObject( obj );
+            return byteOut.toByteArray();
+        } catch (IOException e) { e.printStackTrace();
+            return null;
+        }*/
     }
     private <T> T fromJSON(byte[] json, Class<T> clazz) {
         try {
             if (json==null)return null;
-            return objMapper.readValue(new String(json), clazz);
+            var str = new String(json);
+            return objMapper.readValue(str, clazz);
         } catch (JsonProcessingException e) {
             e.printStackTrace();return null;
-        }
+        }/*
+        try(
+                var byteIn = new ByteArrayInputStream(json);
+                var in = new ObjectInputStream(byteIn)
+        ){
+            return (T) in.readObject();
+        } catch (IOException | ClassNotFoundException e) { e.printStackTrace();
+            return null;
+        }*/
     }
+
     /*  =================================================================  */
-    public String get(String key) throws Exception {
+    public String getBytes(String key) throws Exception {
         synchronized (_db) {
             final var k = key.getBytes();
-            final var v = _db.get(k);
-            return v==null ? null : new String(v);            
+            final var v = _db.get( k );
+            return v==null ? null : new String(v);
         }        
     }
-    public void put(String key, String val) throws Exception {
+    public void putBytes(String key, String val) throws Exception {
         synchronized (_db) {
-            _db.put( key.getBytes() , val.getBytes() );            
-        }        
+            _db.put( key.getBytes() , val.getBytes() );
+        }   // using 'default' table
+    }
+    /*  =================================================================  */
+
+    public <T> T get(String id, Class<T> clazz ) {
+        synchronized (_db){
+            try{
+                return fromJSON( _db.get(getTable(clazz.getName()), id.getBytes()), clazz);
+            }   catch (RocksDBException e) { e.printStackTrace();
+                return null;
+            }
+        }
+    }
+    public <T> Object put( T val ){
+        byte[] id;
+        try {
+            var table = getTable(val.getClass().getName());
+            synchronized (_db) {
+                do id = getID(UUID.randomUUID());
+                while (_db.get(id) != null);
+                _db.put(id, new byte[]{0});
+            }
+            if(val instanceof BaseID)
+                ((BaseID) val).setKey( setID(id) );
+            writeBatch.put( table, id, toJSON(val) );
+
+            return new String(id);
+        } catch (Exception e) { e.printStackTrace();
+            return e;
+        }
+    }
+    public <T> void putId(String key, T val){
+        try{
+            var type = val.getClass();
+            synchronized (_db){
+                if ( type == String.class ) {
+                    writeBatch.put( key.getBytes(), ((String) val).getBytes() );
+                    // String values sorted to 'default' table and acceptable by getBytes
+                } else {
+                    var table = getTable( type.getName() );
+                    writeBatch.put( table, key.getBytes(), toJSON(val) );
+                }
+            }
+        } catch (Exception e) { e.printStackTrace();
+        }
     }
     /*  =================================================================  */    
     class Entry<T>{
@@ -139,15 +202,7 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
     }    
     
     /*  =================================================================  */    
-    public <T> T get(String id, Class<T> clazz ) {
-        synchronized (_db){
-            try{ 
-                return fromJSON( _db.get(getTable(clazz.getName()), id.getBytes()), clazz);
-            }   catch (RocksDBException e) { e.printStackTrace(); 
-                return null;
-            }
-        } 
-    }
+
     ColumnFamilyHandle getTable(String classname){
         ColumnFamilyHandle ret  =  null;        
         if( mapped.get(classname)==null )
@@ -163,37 +218,30 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
     }    
     /*  =================================================================  */
     public <T> List<T> getPrivate(String hostId, Class<?> clazz) throws Exception {
-
-        var snap  = getSnap();      
+        final var snap  = getSnap();
         final var rd = new ReadOptions(); 
         final var table = getTable(clazz.getName());        
         rd.setSnapshot(snap).setAsyncIo(true);
-        final var gc = Runtime.getRuntime();
-        
-        byte[] idx;
-        final var start = gc.freeMemory();
-        synchronized (_db) {
-            idx= _db.get(hostId.getBytes()); if( idx==null ) return new ArrayList<>();
-        }   final var hash = (new String(idx)).split("::");
-            final var name = clazz.getName();     
-            final var keys = Arrays.asList( hash ).parallelStream()
-                .filter( k-> k.contains( name ))
-                .map(    k-> k.substring(name.length()))
-                .map(    k-> k.getBytes() )  .toList();                                
-            final var tables = Stream.generate(()->table).limit(keys.size()).toList();
-            final List<byte[]> value;
-            synchronized (_db) {
-                value = _db.multiGetAsList( rd, tables, keys );    
-            }   
-        final var end = gc.freeMemory();    if( gc.freeMemory()<=start - end )  
-        { gc.gc();  System.err.println("\nGC!\n"+ Arrays.toString(Thread.currentThread().getStackTrace())); }
-        
-        return value.parallelStream().filter(Objects::nonNull)
-                    .map( e-> (T) fromJSON(e, clazz) )
-                    .filter(Objects::nonNull).toList();
-    } 
+
+        String idx = null;
+        synchronized (_db) {    // associated keys in 'default' table
+            var hsh = _db.get(hostId.getBytes());
+            if( hsh==null ) return new ArrayList<>();
+            idx = new String( hsh );
+        }
+        final var keys = Arrays.asList( idx.split("::") )
+                .stream().map(k-> k.getBytes()).toList();
+        final var tables = Stream.generate(()->table).limit(keys.size()).toList();
+
+        List<byte[]> value;
+        synchronized (_db) {    value = _db.multiGetAsList( rd, tables, keys ); }
+
+        return  value.stream().filter(Objects::nonNull)
+                .map(e-> (T)fromJSON( e, clazz ))
+                .filter(Objects::nonNull).toList();
+    }
     /*  =================================================================  */
-    private final WriteBatch writeBatch = new WriteBatch();    
+    private final WriteBatch writeBatch = new WriteBatch();
     public void commit(){               
         Thread.ofVirtual().start(
             ()->{
@@ -210,58 +258,20 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
     public <T> Object addPrivate(String hostId, T value, Class<?> clazz){
             try {
                 ColumnFamilyHandle table = getTable(clazz.getName());
-                byte[] id;
-                synchronized (_db) {                
-                    do id =  getID( UUID.randomUUID() );
-                    while( _db.get(table, id) != null );        
-                    
-                    final var idx = setID(id);  
-                    final var hex = Integer.toHexString(idx);     
-                    final var key = hostId + hex;
+                final var id = getNewKey(null);
+                if(value instanceof BaseID)
+                    ((BaseID) value)
+                            .setKey( id )
+                            .setHost(hostId);
 
-                    if(value instanceof BaseID)
-                    {
-                        ((BaseID) value).setKey ( idx );                    
-                        ((BaseID) value).setHost(hostId);                    
-                    }                    
-                    final var data = toJSON( value );
-
-                    writeBatch.put(table, key.getBytes(), data );                        
-                    return key;
-                }                                                                    
+            synchronized (_db) {
+                writeBatch.put(table, id.getBytes(), toJSON(value));
+                return id;
+            }
             } catch (Exception e) { e.printStackTrace(); 
                 return null;
             }                             
     }
-    public <T> Object put( T val ){        
-        byte[] id; 
-        try {
-            var table = getTable(val.getClass().getName());
-            synchronized (_db) {
-                
-                do id  = getID( UUID.randomUUID() );
-                while( _db.get( id )!=null );         
-                _db.put( id, new byte[]{0} );
-
-                if(val instanceof BaseID)
-                ((BaseID) val).setKey(  setID(id) );
-
-                writeBatch.put( table, id, toJSON(val) );                 
-            }                                                
-            return new String(id);
-        } catch (Exception e) { e.printStackTrace(); 
-            return e;
-        }        
-    }
-    public <T> void putId(String key, T val){        
-        try{
-            synchronized (_db){          
-                var table= getTable(   val.getClass().getName()  );
-                writeBatch.put( table, key.getBytes(), toJSON(val) );
-            } 
-        } catch (Exception e) { e.printStackTrace(); 
-        }
-    }    
     public <T> String getNewKey(T val){
         synchronized (_db) {         
             try {
@@ -276,24 +286,33 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
             }   
         }
     }
-    private Integer setID(byte[] byteArray){
-        return ((byteArray[0] & 0xFF) << 24) | 
-               ((byteArray[1] & 0xFF) << 16) | 
-               ((byteArray[2] & 0xFF) << 8)  | 
-                (byteArray[3] & 0xFF);
+    private byte[] getID(UUID rnd){
+        return getID( rnd.getMostSignificantBits(), rnd.getLeastSignificantBits() );
     }
-    private byte[] getID(long value){
+    private Integer setID(byte[] arr){
+        return  ((arr[0] & 0xFF) << 56) |
+                ((arr[1] & 0xFF) << 48) |
+                ((arr[2] & 0xFF) << 40) |
+                ((arr[3] & 0xFF) << 32) |
+                ((arr[4] & 0xFF) << 24) |
+                ((arr[5] & 0xFF) << 16) |
+                ((arr[6] & 0xFF) << 8)  |
+                ( arr[7] & 0xFF);
+    }
+    private byte[] getID(long val1, long val2){
         return new byte[] {
-            (byte) (value >> 24), 
-            (byte) (value >> 16),
-            (byte) (value >> 8),
-            (byte)  value 
+                (byte) (val1 >> 56),
+                (byte) (val1 >> 48),
+                (byte) (val1 >> 40),
+                (byte) (val1 >> 32),
+                (byte) (val2 >> 24),
+                (byte) (val2 >> 16),
+                (byte) (val2 >> 8),
+                (byte)  val2
         };
     }
-    private byte[] getID(UUID rnd){
-        var value = rnd.getMostSignificantBits();
-        return getID(value);
-    }
+
+
     /*  =================================================================  */
     public void deleteKey( String key) throws Exception {
         try {
@@ -311,11 +330,11 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
     public void deletePrivate( String hshKey, String key, Class clazz ) throws Exception {
         String hsh;
         try {
-            hsh = get(hshKey);
+            hsh = getBytes(hshKey);
             if( hsh!=null ){
                 var upd = Arrays.asList( hsh.split("::") ).parallelStream()
                     .filter( k->!k.contains(key) ).collect(Collectors.joining("::"));
-                put(hshKey, upd);
+                putBytes(hshKey, upd);
             }            
             var table = getTable( clazz.getName() );
             synchronized (_db){                 

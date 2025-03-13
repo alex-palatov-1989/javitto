@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface IQuerySide {       
-    public String get(String key) throws Exception ;
+    public String getBytes(String key) throws Exception ;
     public <T>  T get(String id, Class<T> clazz ) throws Exception ;
     public <T> List<T> getPrivate(String hostId, Class<?> clazz) throws Exception ;    
 

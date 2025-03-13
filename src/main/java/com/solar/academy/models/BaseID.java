@@ -1,31 +1,37 @@
 package com.solar.academy.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jdk.jfr.Unsigned;
 import lombok.Data;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 
 @Data
-public class BaseID {
+public class BaseID implements Serializable {
     public Integer id  =0;
-    public Integer host=0;
+    public String  host="";
 
-    public  String  getKey()    { return Integer.toHexString(id); }
-    public  String  getOwner()  { return Integer.toHexString(host);}
-
-    public BaseID setKey(Integer i) {
-        id = i;    return this;
+    public  String  getKey()
+    {
+        return Integer.toHexString(id);
     }
-    public BaseID setOwner(Integer i) {
-        host = i;   return this;
+    public  BaseID  setKey(Integer i)
+    {
+        id = i;    return this;
     }
 
     @JsonIgnore     public BaseID setHost(String str)
     {
-        host = Integer.parseUnsignedInt(str, 16);
+        host = str;
         return this;
     }
     @JsonIgnore     public BaseID setKey(String str) {
         id = Integer.parseUnsignedInt(str, 16);
         return this;
     }
+
+    public
+    LocalDateTime createDateTime;
 }

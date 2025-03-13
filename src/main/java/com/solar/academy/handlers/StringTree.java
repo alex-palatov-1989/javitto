@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import lombok.Getter;
@@ -16,7 +17,7 @@ import org.json.JSONObject;
 
 
 @NoArgsConstructor
-class StringTree {
+public class StringTree {
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface Leaf{}    
@@ -85,8 +86,12 @@ class StringTree {
             arr.toList().stream().forEach(
                 (childJson)->{
                     try {
-                        T child = (T)clazz.getDeclaredConstructors()[0].newInstance((Object)null);    
-                        child.fromJSON( (JSONObject)childJson, clazz ); 
+                        T child = (T)clazz.getDeclaredConstructors()[0].newInstance((Object)null);
+                        if( childJson instanceof JSONObject )
+                            child.fromJSON( (JSONObject) childJson , clazz );
+                        else
+                            child.fromJSON(  new JSONObject((Map<?, ?>) childJson), clazz );
+
                         this.children.put(child.id, child);                            
                     } catch (Exception e) { e.printStackTrace();
                     }                        

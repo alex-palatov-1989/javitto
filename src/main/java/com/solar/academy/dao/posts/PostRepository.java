@@ -8,34 +8,32 @@ import java.util.List;
 import com.solar.academy.database.Cache;
 import com.solar.academy.models.posts.BasePost;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
 final public class PostRepository extends PostDAO implements IPostRepository{
         
-    @Getter final UserPostDAO      users   = new UserPostDAO();
-    @Getter final MarketPostDAO    markets = new MarketPostDAO();
+    @Getter UserPostDAO      users;
+    @Getter MarketPostDAO    markets;
+            Cache            _db;
 
-    public SearchFlags     getFlags() { return new SearchFlags(); }
-    
-    public List<BasePost>  defaultSearch(String tag)
-    {
-        return findText(tag, getFlags());
+    @Override
+    synchronized Cache db() {
+        return  _db;
     }
-    public List<BasePost>  searchCategory(String tag)
-    {
+
+    public SearchFlags     getFlags()                   { return new SearchFlags(); }
+    public List<BasePost>  defaultSearch(String tag)    { return findText(tag, getFlags()); }
+
+    public List<BasePost>  searchCategory(String tag) {
         var cat = getFlags(); cat.byCat=true; cat.byHead = false;
         return findText( tag, cat );
     }
-    public List<BasePost>  searchInUsers(String tag)
-    {
+    public List<BasePost>  searchInUsers(String tag) {
         var cat = getFlags(); cat.byCat=true; cat.onMarket = false;
         return findText( tag, cat );
     }
-    public List<BasePost>  searchOnMarket(String tag)
-    {
+    public List<BasePost>  searchOnMarket(String tag) {
         var cat = getFlags(); cat.byCat=true; cat.inUsers = false;
         return findText( tag, cat );
     }
@@ -73,10 +71,5 @@ final public class PostRepository extends PostDAO implements IPostRepository{
         } catch   ( Exception e  ) {     e.printStackTrace();
         } finally { System.gc(); }           
         return ret;
-    }
-
-    @Autowired Cache _db;
-    @Override synchronized Cache db() {
-        return  _db;
     }
 }

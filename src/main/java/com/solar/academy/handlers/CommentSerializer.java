@@ -14,7 +14,7 @@ public class CommentSerializer {
     static public class Serializer extends JsonSerializer<Comment> {
         @Override
         public void serialize(Comment value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            gen.writeRawValue(value.toJSON().toString()); // Use the custom toJson method
+            gen.writeRawValue(value.toJSON().toString());
         }
     }
 
@@ -23,7 +23,7 @@ public class CommentSerializer {
         public Comment deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             String json = p.readValueAs(String.class);
             var val = new Comment();
-            val.fromJSON( new JSONObject(json), Comment.class ); // Use the custom fromJson method
+            val.fromJSON( new JSONObject(json), Comment.class );
             return val;
         }
     }

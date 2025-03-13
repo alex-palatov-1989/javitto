@@ -18,7 +18,7 @@ public class BaseUser extends BaseID{
     String phone;
     
     @IRelative.ToList
-    public Message[] messages;
+    public List<Message> messages;
 
     @IRelative.ToList
     public List<String> photo;

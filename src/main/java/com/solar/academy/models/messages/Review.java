@@ -7,11 +7,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Data
 public class Review extends StringMsg{
     
     @IRelative.ToList
-    public String[]         photos;    
-    
-    BaseID   post;
+    public List<String> photos;
+
+    public String   postID;
+    public String   header;
 }

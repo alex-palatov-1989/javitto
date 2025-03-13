@@ -10,6 +10,6 @@ import lombok.Setter;
 @Data
 public class Answer extends StringMsg{
 
-    public BaseID post;
+    public String postID;
 }   // any post can has answers
     // answer is independent table

@@ -21,7 +21,6 @@ public class FullPost extends BasePost{
     public List<String> photos;
 
     public String       description;
-    public JSONObject   jsonComments;
 
     @JsonSerialize  (using = CommentSerializer.Serializer.class)
     @JsonDeserialize(using = CommentSerializer.Deserializer.class)

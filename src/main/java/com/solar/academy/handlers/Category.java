@@ -1,15 +1,19 @@
 package com.solar.academy.handlers;
 
-
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Service;
 
-@NoArgsConstructor
-public class Category extends StringTree{
+import java.io.Serializable;
+
+
+@Service
+public class Category extends StringTree {
 
     private static final String   ROOT = new String("root");
     private static final Category ROOT_INSTANCE = new Category(ROOT);
+    public  static Category build(){ return ROOT_INSTANCE; }
 
-    private Category(String id) {
+    public Category(String id) {
         super(id);
     }
 
@@ -33,13 +37,14 @@ public class Category extends StringTree{
     private Category findByIdRecursive(String id) {
         if (this.id.equals(id)) {
             return this;
-        } else
-        return children
-            .values().stream().map(
-                child-> ((Category)child).findByIdRecursive(id)                    
-            )
-            .filter(found -> found != null)
-            .findFirst().orElse(null);
+        } else {
+            return children
+                    .values().stream().map(
+                            child -> ((Category) child).findByIdRecursive(id)
+                    )
+                    .filter(found -> found != null)
+                    .findFirst().orElse(null);
+        }
     }
 
     public static void deleteByid(String id) {

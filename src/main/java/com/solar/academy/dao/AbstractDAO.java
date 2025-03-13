@@ -18,7 +18,7 @@ import lombok.AllArgsConstructor;
 
 public interface AbstractDAO {
 
-    public Class<?> dataclass();
+    Class<?> dataclass();
 
     @SuppressWarnings("unchecked")
     default <T> void write(String key, T value, Cache db) throws Exception{
@@ -94,14 +94,14 @@ public interface AbstractDAO {
                       return((CompletableFuture<?>) fib).get();
                     } catch ( Exception e ) { e.printStackTrace(); return null; } 
                     }).collect(Collectors.joining("::"));
-            
-            var having = db.api().get(key);
-            if( having==null ) having = "";
-            db.executor().put( key, having+added );
-            db.executor().put( key, value );
-                                
-            if( err[0]!=null )  err[0].printStackTrace();
 
+            var having = db.api().getBytes(key);
+            if( having==null ) having = "";
+            db.api().putBytes( key, having+added );
+            db.api().putId( key, value );
+            db.api().commit();
+
+            if( err[0]!=null )err[0].printStackTrace();
             return  key;
         } catch (Exception e) { System.err.println(e.getMessage()); throw e;
         }   
@@ -115,7 +115,7 @@ public interface AbstractDAO {
         try {            
             var data  = (T)db.api().get(key, dataclass());
             if( data != null )
-                colls.parallelStream().forEach(
+                colls.stream().forEach(
                     (g)->{
                         try {      
                             if(g.field.isAnnotationPresent(IRelative.ToList.class))    
@@ -126,14 +126,17 @@ public interface AbstractDAO {
                                 } else {
                                     g.field.set(data, list);
                                 }
-                            }                                                                                                                                                                                             
+                            }
                         } catch (Exception e) {                             
                             err[0] = e;
                             System.err.println(e.getMessage());
                         }                    
                     }
                 );  
-                else return null;
+                else {
+                System.err.println( "\n>_ readed null on key:"+key);
+                return null;
+            }
 
             if(err[0]!=null)throw err[0];
             else return data;

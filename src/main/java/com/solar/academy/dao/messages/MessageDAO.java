@@ -11,17 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 abstract public class MessageDAO implements AbstractDAO {
     abstract Cache db();
 
-    public List<?> getByPost(String postID) throws Exception
+    public List<?> getByHost(String hostID) throws Exception
     {
-        return db().api().getPrivate( postID, dataclass() );
+        return db().api().getPrivate( hostID, dataclass() );
     }   
 
-    public void edit(StringMsg post, String id) throws Exception
+    public <T extends StringMsg> void edit(T post, String id) throws Exception
     {
         db().executor().put( id, post );
     }
 
-    public void create(StringMsg post, String host) throws Exception
+    public <T extends StringMsg>  void create(T post, String host) throws Exception
     {
         db().executor().addPrivate( host, post, dataclass() );
     }

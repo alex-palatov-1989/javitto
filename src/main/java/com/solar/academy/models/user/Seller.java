@@ -7,17 +7,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Data
 public class Seller extends BaseID{
 
     boolean isMarket;
 
     @IRelative.ToList
-    public BaseID[] posts;    
+    public List<BaseID> posts;
 
     @IRelative.ToList
-    public BaseID[] questions;
+    public List<BaseID> questions;
 
     @IRelative.ToList
-    public BaseID[] deals;
+    public List<BaseID> deals;
 }

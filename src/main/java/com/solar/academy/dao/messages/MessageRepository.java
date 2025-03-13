@@ -14,22 +14,25 @@ import org.springframework.stereotype.Repository;
 public final class MessageRepository implements IMessageRepository {
     final static class AnswerDAO extends MessageDAO implements IMessageDAO {
         @Override   Cache db() { return getDB(); }
-        @Override   public Class<?> dataclass() {   return Answer.class;
+        @Override   public Class<?> dataclass() {
+            return Answer.class;
         }
     }
     final static class ReviewDAO extends MessageDAO implements IMessageDAO{
         @Override   Cache db() { return getDB(); }
-        @Override   public Class<?> dataclass() {   return Review.class;
+        @Override   public Class<?> dataclass() {
+            return Review.class;
         }
     }
     final static class LetterDAO extends MessageDAO implements IMessageDAO{
         @Override   Cache db() { return getDB(); }
-        @Override   public Class<?> dataclass() {   return Message.class;
+        @Override   public Class<?> dataclass() {
+            return Message.class;
         }
     }
-    @Getter final AnswerDAO     answers   = new AnswerDAO();
-    @Getter final ReviewDAO     reviews   = new ReviewDAO();
-    @Getter final LetterDAO     letters   = new LetterDAO();
+    @Getter @Autowired AnswerDAO     answers;
+    @Getter @Autowired ReviewDAO     reviews;
+    @Getter @Autowired LetterDAO     letters;
 
     @Autowired   static Cache _db;
     synchronized static Cache getDB(){

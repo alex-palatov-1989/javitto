@@ -1,11 +1,11 @@
 package com.solar.academy.database;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.solar.academy.models.posts.MarketPost;
-import com.solar.academy.models.posts.UserPost;
+
+import com.solar.academy.dao.AbstractDAO;
+import com.solar.academy.dao.TMP;
 import lombok.Getter;
 
+import lombok.SneakyThrows;
 import org.rocksdb.*;
 
 import java.lang.reflect.Method;
@@ -18,9 +18,10 @@ import java.util.stream.Stream;
 
 public class Cache implements AutoCloseable{
     @Override public void close(){
-        db.close();
+        executor.stop();
         mapped.values().forEach(ColumnFamilyHandle::close);
-        executor.stop(); memory = null;
+        db.close(); memory = null;
+        System.out.println("\n>_ closed: "+DB_PATH);
     }
     private final String         DB_PATH     = "/tmp/rocksdb";
     private final Options        deflt       = new Options();
@@ -35,7 +36,7 @@ public class Cache implements AutoCloseable{
     static {   RocksDB.loadLibrary();      }        
     static     LRUCache memory = new LRUCache(cache);
 
-    Cache(){
+    public Cache(){
         List<ColumnFamilyDescriptor>  types  = new ArrayList<>();    
         List<ColumnFamilyHandle>      tables = new ArrayList<>();
 
@@ -73,6 +74,8 @@ public class Cache implements AutoCloseable{
 
             executor = new CommandExecutor(this);
         }   catch (RocksDBException e) { e.printStackTrace();
+        }   finally {
+            System.err.println(" Cache instance loaded at "+DB_PATH);
         }
     }    
 
@@ -93,23 +96,14 @@ public class Cache implements AutoCloseable{
         private HashMap< String,Method > commands;    
     /*  =======================================  */
 
-
     public static void main(String[] args) {
-        try {
-            var mapper = new ObjectMapper();
-            var userP  = new MarketPost();
-            System.out.println(mapper.writeValueAsString(userP));
-        } catch (JsonProcessingException e){ e.printStackTrace();}
 
-
-
-        /*
         try (Cache db = new Cache();){
-            var dao = new BaseDAO(){
+            var dao = new AbstractDAO(){
                 @Override
                 public Class<?> dataclass(){ return TMP.class; }
             };
-            var i=0;    var N = 33;     String key = null;
+            var i=0;    var N = 20;     String key = null;
             List <String> keys = new ArrayList<>();
             List <TMP> el = new ArrayList<>();
             var  foo = new  TMP();
@@ -127,37 +121,35 @@ public class Cache implements AutoCloseable{
             }
             var end = System.currentTimeMillis();
 
+            Thread.sleep(4999);
+
             System.out.println( (end-start)      + " ms");
             System.out.println( ((end-start)/N)  + " ms/rec" );
 
             start = System.currentTimeMillis();
-            keys.parallelStream().map(
-                    (e)-> {
-                        final var k = (String) e;
-                        return Thread.ofVirtual().start(
-                                ()->{
-                                    try {
-                                        TMP v = dao.read(k, db);
-                                        el.add(v);
-                                    } catch (Exception err) { err.printStackTrace();
-                                    }
-                                }
-                        );
+            keys.stream().forEach(
+                    k-> {
+                        try {
+                            TMP val = dao.read(k, db);
+                            if(val == null) throw new NullPointerException();
+                            el.add( val );
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-            ).forEach(t -> {
-                try {   t.join();
-                } catch (InterruptedException e1) { e1.printStackTrace();
-                }
-            });
+            );
             end = System.currentTimeMillis();
             var time = (end-start);
 
             System.err.println(  (  time  )   +" ms read count:"+ N);
             System.err.println(  ( (time)/N ) +" ms read each");
-            System.out.println("\n\t\tEND");
+
+            Thread.sleep(999);
+            System.out.println( el.size() +"\n\n");
+            el.forEach( e->System.out.println( e.linked.size() )    );
+
         } catch (Exception e) { e.printStackTrace();
         }
-        */
     }
 }
 

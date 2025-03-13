@@ -8,6 +8,6 @@ public class JavittoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(JavittoApplication.class, args);
-	}
 
+	}
 }
