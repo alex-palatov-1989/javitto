@@ -1,11 +1,10 @@
 package com.solar.academy.dao.messages;
 
-import com.solar.academy.database.Cache;
+import com.solar.academy.cache.Cache;
 import com.solar.academy.models.messages.Answer;
 import com.solar.academy.models.messages.Message;
 import com.solar.academy.models.messages.Review;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -30,9 +29,9 @@ public final class MessageRepository implements IMessageRepository {
             return Message.class;
         }
     }
-    @Getter @Autowired AnswerDAO     answers;
-    @Getter @Autowired ReviewDAO     reviews;
-    @Getter @Autowired LetterDAO     letters;
+    @Getter  AnswerDAO     answers;
+    @Getter  ReviewDAO     reviews;
+    @Getter  LetterDAO     letters;
 
     @Autowired   static Cache _db;
     synchronized static Cache getDB(){

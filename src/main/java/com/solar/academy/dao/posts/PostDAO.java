@@ -4,12 +4,11 @@ import java.util.HashMap;
 import java.util.Set;
 
 import com.solar.academy.dao.AbstractDAO;
-import com.solar.academy.database.Cache;
-import com.solar.academy.database.IQuerySide;
+import com.solar.academy.cache.Cache;
+import com.solar.academy.cache.IQuerySide;
 import com.solar.academy.models.posts.BasePost;
 import com.solar.academy.models.posts.MarketPost;
 import com.solar.academy.models.posts.UserPost;
-import org.springframework.beans.factory.annotation.Autowired;
 
 abstract public class PostDAO {
     abstract Cache db();

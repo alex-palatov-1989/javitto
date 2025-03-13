@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-@NoArgsConstructor
 public class Comment extends StringTree {
     
     @Leaf private String sender; 
@@ -18,6 +17,7 @@ public class Comment extends StringTree {
     final Set<Integer> idxs = new HashSet<>();
     static int getRnd(){ return Math.abs(UUID.randomUUID().hashCode()); }
 
+    Comment(){ this(0, null, null); }
     Comment(int id, String sender, String text) {
         super( String.valueOf(id) );
         this.sender = sender;

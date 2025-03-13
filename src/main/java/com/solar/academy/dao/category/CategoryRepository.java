@@ -1,20 +1,19 @@
 package com.solar.academy.dao.category;
 
-import com.solar.academy.database.Cache;
+import com.solar.academy.cache.Cache;
 import com.solar.academy.handlers.Category;
+import lombok.AllArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 
 @Repository
+@AllArgsConstructor
 public class CategoryRepository {
 
     final String CATEGORY_TREE_KEY = "category_tree_key";
-    static Cache db;
-
-    public CategoryRepository() {
-    }
+    final Cache db;
 
     public Category load(){
         try {
@@ -42,7 +41,6 @@ public class CategoryRepository {
 
     // unit test handle
     public static CategoryRepository build(){
-        db = new Cache();
-        return new CategoryRepository();
+        return new CategoryRepository( new Cache() );
     }
 }

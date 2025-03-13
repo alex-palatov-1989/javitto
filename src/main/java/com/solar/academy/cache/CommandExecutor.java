@@ -1,4 +1,4 @@
-package com.solar.academy.database;
+package com.solar.academy.cache;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -7,8 +7,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class CommandExecutor implements Runnable{
     final  ExecutorService runner = Executors.newCachedThreadPool();

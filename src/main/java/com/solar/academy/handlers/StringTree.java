@@ -16,13 +16,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 
-@NoArgsConstructor
 public class StringTree {
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface Leaf{}    
 
-    protected String id;
+    protected String id = null;
 
     @Getter @Setter
     protected StringTree parent;

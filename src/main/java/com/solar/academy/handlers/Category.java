@@ -1,18 +1,17 @@
 package com.solar.academy.handlers;
 
 import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.io.Serializable;
+import org.springframework.stereotype.Component;
 
 
-@Service
+@Component
 public class Category extends StringTree {
 
     private static final String   ROOT = new String("root");
     private static final Category ROOT_INSTANCE = new Category(ROOT);
     public  static Category build(){ return ROOT_INSTANCE; }
 
+    public Category(){this(ROOT);}
     public Category(String id) {
         super(id);
     }

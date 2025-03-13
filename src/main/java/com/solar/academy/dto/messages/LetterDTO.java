@@ -1,5 +1,4 @@
-package com.solar.academy.request.messages;
-
+package com.solar.academy.dto.messages;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -10,8 +9,10 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
-@NoArgsConstructor @Builder @Data
-public class AnswerRequest implements IMessageRequest{
+@NoArgsConstructor
+@Builder
+@Data
+public class LetterDTO extends IMessageDTO{
 
     @NotBlank( message = "cant assign with postID==null" )
     String postID;
@@ -22,6 +23,8 @@ public class AnswerRequest implements IMessageRequest{
     @NotBlank( message = "cant assign with sender==null" )
     String sender;
 
-    public
-    LocalDateTime createDateTime;
+    @NotBlank( message = "cant assign with seller==null" )
+    String seller;
+
+    String image;
 }

@@ -1,11 +1,11 @@
-package com.solar.academy.database;
+package com.solar.academy.cache;
 
 import lombok.Getter;
 
 public interface ICommandSide {
-    public <T> void   putId(String key, T val);
-    public <T> Object put( T val );
-    public <T> Object addPrivate(String hostId, T value, Class<?> clazz);
+    public <T> void   putId(String key, T val)          throws Exception;
+    public <T> Object put( T val )                      throws Exception;
+    public <T> Object addPrivate(String hostId, T value, Class<?> clazz)throws Exception;
     enum COMMAND{        
         PUT ("putId"), 
         POST("put"), 

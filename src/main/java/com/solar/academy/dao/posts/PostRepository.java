@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import com.solar.academy.database.Cache;
+import com.solar.academy.cache.Cache;
 import com.solar.academy.models.posts.BasePost;
 import lombok.Getter;
 import org.springframework.stereotype.Repository;

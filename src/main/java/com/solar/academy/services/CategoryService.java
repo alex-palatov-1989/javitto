@@ -4,22 +4,26 @@ package com.solar.academy.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.solar.academy.dao.category.CategoryRepository;
 import com.solar.academy.handlers.Category;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
 @Service
+//@NoArgsConstructor
 public class CategoryService {
 
-    static Category             category;
-    static CategoryRepository   repository;
-    public static synchronized Category getTag()
+    Category             category;
+    CategoryRepository   repository;
+    public synchronized Category getTag()
     {
         return  category;
     }
-
-    public CategoryService(){
+    public CategoryService(CategoryRepository db){
         try{
+            this.repository = db;
             category = repository.load();
             if( category == null )
             {
@@ -45,15 +49,19 @@ public class CategoryService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            System.err.println(
+                    category.toJSON().toString(5)
+            );
         }
     }
-    public static String find( String tag )
+    public  String find( String tag )
     {
         synchronized (category){
             return  getTag().findById(tag).tag();
         }
     }
-    public static String path( String tag )
+    public  String path( String tag )
     {
         synchronized (category){
             return  getTag().getPath(tag);
@@ -61,7 +69,7 @@ public class CategoryService {
     }
 
     /* callable from AdminCategoryService */
-    protected static void append( String host, String child )
+    protected  void append( String host, String child )
     {
         try{
             repository.save(
@@ -73,7 +81,7 @@ public class CategoryService {
             e.printStackTrace();
         }
     }
-    protected static void remove( String tag )
+    protected  void remove( String tag )
     {
         synchronized (category){
             getTag().deleteByid(tag);
@@ -88,16 +96,9 @@ public class CategoryService {
     }
 
     // unit test handle
-    public static CategoryService build(){
+    public  CategoryService build(){
         repository = CategoryRepository.build();
-        return new CategoryService();
-    }
-
-    public static void main(String args[]) throws JsonProcessingException {
-        var service = CategoryService.build();
-        System.err.println(
-                service.getTag().toJSON().toString(5)
-        );
+        return new CategoryService(repository);
     }
 }
 

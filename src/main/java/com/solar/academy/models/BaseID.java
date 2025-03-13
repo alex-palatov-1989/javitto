@@ -12,16 +12,16 @@ import java.time.LocalDateTime;
 public class BaseID implements Serializable {
     public Integer id  =0;
     public String  host="";
-
-    public  String  getKey()
+    public String  getKey()
     {
         return Integer.toHexString(id);
     }
-    public  BaseID  setKey(Integer i)
-    {
-        id = i;    return this;
-    }
 
+    @JsonIgnore public  BaseID  setKey(Integer i)
+    {
+        id = i;
+        return this;
+    }
     @JsonIgnore     public BaseID setHost(String str)
     {
         host = str;
@@ -33,5 +33,5 @@ public class BaseID implements Serializable {
     }
 
     public
-    LocalDateTime createDateTime;
+    LocalDateTime datetime;
 }

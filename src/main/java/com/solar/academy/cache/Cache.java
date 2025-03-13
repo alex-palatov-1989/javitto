@@ -1,12 +1,12 @@
-package com.solar.academy.database;
+package com.solar.academy.cache;
 
 
 import com.solar.academy.dao.AbstractDAO;
 import com.solar.academy.dao.TMP;
 import lombok.Getter;
 
-import lombok.SneakyThrows;
 import org.rocksdb.*;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@Component
 public class Cache implements AutoCloseable{
     @Override public void close(){
         executor.stop();

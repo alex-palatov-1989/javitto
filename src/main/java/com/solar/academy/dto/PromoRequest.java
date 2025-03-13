@@ -1,4 +1,4 @@
-package com.solar.academy.request;
+package com.solar.academy.dto;
 
 
 import jakarta.validation.constraints.NotBlank;

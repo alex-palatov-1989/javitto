@@ -4,21 +4,37 @@ package com.solar.academy.dao;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.solar.academy.database.Cache;
+import com.solar.academy.cache.Cache;
 import com.solar.academy.models.BaseID;
 import lombok.AllArgsConstructor;
 
 public interface AbstractDAO {
 
     Class<?> dataclass();
+
+    default void putNewKey(String host, String key, Cache db) throws Exception{
+
+        final var  ids  =  db.api().getBytes(host);
+        db.api().putBytes(host, ids+"::"+key);
+    }
+
+    default void removePrivateKey( String hshKey, List<String> keys, Cache db ) throws Exception {
+        final var hsh = db.api().getBytes(hshKey);
+        String    upd = "";
+
+        if( hsh!=null ){
+            upd = Arrays.asList( hsh.split("::") ).parallelStream()
+                    .filter( id->keys.contains(id) ).collect(Collectors.joining("::"));
+        }
+        if( hsh == null )
+            throw new Exception("not found hash table");
+        db.api().putId( hshKey, upd );
+    }
 
     @SuppressWarnings("unchecked")
     default <T> void write(String key, T value, Cache db) throws Exception{
@@ -155,7 +171,7 @@ public interface AbstractDAO {
                 recursive.putAll(
                     Stream.of( clazz.getDeclaredFields() )
                     .filter(
-                        f->f.getAnnotations().length!=0
+                        f->f.getAnnotations().length != 0
                     ).collect( Collectors.toMap
                         (Field::getName, e->e )
                     )                                       
