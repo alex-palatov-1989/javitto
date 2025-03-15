@@ -40,9 +40,9 @@ public class PromoDTO extends RequestBase{
     String description;
 
 
-    List<ReviewDTO>    reviews; List<AnswerDTO> answers;
-
-    List<String>    photos;
+    List<String>        photos;
+    List<ReviewDTO>     reviews;
+    List<AnswerDTO>     answers;
+    List<PromoDTO>      related;
     Comment         rootComment;
-    List<PromoDTO>  related;
 }

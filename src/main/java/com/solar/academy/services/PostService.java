@@ -1,27 +1,19 @@
 package com.solar.academy.services;
 
-import com.solar.academy.dao.posts.IPostRepository;
 import com.solar.academy.dto.PromoDTO;
 import com.solar.academy.mapping.MessageMapper;
 import com.solar.academy.mapping.PostMapper;
-import com.solar.academy.models.posts.BasePost;
-import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.IntStream;
 
 @Service
 @Scope ("session")
 public class PostService extends SearchService{
 
-    IPostRepository repository;
     CategoryService tagService;
-
     PostMapper      postMapper;
     MessageMapper   msgMapper;
-
 
     PromoDTO getUserPromoById( String id ) throws Exception{
         var item= repository.getUsers().get(id);
@@ -54,6 +46,8 @@ public class PostService extends SearchService{
         );
         return dto;
     }
+
+
 }
 
 
