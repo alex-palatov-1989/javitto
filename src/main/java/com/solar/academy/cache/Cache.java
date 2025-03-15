@@ -37,7 +37,7 @@ public class Cache implements AutoCloseable{
     static {   RocksDB.loadLibrary();      }        
     static     LRUCache memory = new LRUCache(cache);
 
-    public Cache(){
+    public Cache() {
         List<ColumnFamilyDescriptor>  types  = new ArrayList<>();    
         List<ColumnFamilyHandle>      tables = new ArrayList<>();
 
