@@ -2,9 +2,11 @@ package com.solar.academy.cache;
 
 
 import com.solar.academy.dao.AbstractDAO;
-import com.solar.academy.dao.TMP;
+import com.solar.academy.dao.IRelative;
+import com.solar.academy.models.BaseID;
 import lombok.Getter;
 
+import lombok.Setter;
 import org.rocksdb.*;
 import org.springframework.stereotype.Component;
 
@@ -98,6 +100,15 @@ public class Cache implements AutoCloseable{
     /*  =======================================  */
 
     public static void main(String[] args) {
+
+        class TMP extends BaseID {
+
+            @Getter @Setter
+            public String  name = "alex";
+
+            @IRelative.ToList
+            transient public List<TMP> linked = null;
+        }
 
         try (Cache db = new Cache();){
             var dao = new AbstractDAO(){

@@ -11,15 +11,35 @@ import java.util.List;
 @Service
 public class ImageService {
     ImageRepository db;
-    public ResponseEntity<byte[]> get( String id ) throws Exception{
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, "image/jpeg") // Adjust for your image type
-                .body( db.load(id) );
+    public ResponseEntity<?> get( String id ) throws Exception{
+        try{
+            var image = db.load(id);
+            return image == null ?
+            ResponseEntity.notFound().build() :
+            ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, "image/jpeg") // Adjust for your image type
+                    .body( image );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body( e.getMessage() );
+        }
     }
-    public void post( MultipartFile img ) throws Exception{
-        db.saveImage(img);
+    public ResponseEntity<?> post( MultipartFile img )       throws Exception{
+        try {
+            db.saveImage(img);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body( e.getMessage() );
+        }
+        return ResponseEntity.ok().build();
     }
-    public void post( List<MultipartFile> img ) throws Exception{
-        db.saveImages(img);
+    public ResponseEntity<?> post( List<MultipartFile> img ) throws Exception{
+        try {
+            db.saveImages(img);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body( e.getMessage() );
+        }
+        return ResponseEntity.ok().build();
     }
 }

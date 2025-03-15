@@ -17,7 +17,7 @@ public class ImageRepository implements AutoCloseable{
     @Override public void close(){ db.close(); }
 
     public ImageRepository()  {
-        deflt.setCreateIfMissing(true)
+        deflt   .setCreateIfMissing(true)
                 .setIncreaseParallelism(cores)
                 .getEnv().setBackgroundThreads(cores);
 
