@@ -1,25 +1,20 @@
 package com.solar.academy.dto.messages;
 
-
+import com.solar.academy.dto.RequestBase;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDateTime;
-
-@AllArgsConstructor
-@NoArgsConstructor @Builder @Data
-public class AnswerDTO extends IMessageDTO{
+@Data
+@AllArgsConstructor @NoArgsConstructor
+public class AnswerDTO extends RequestBase {
 
     @NotBlank( message = "cant assign with postID==null" )
-    String postID;
+    private String postID;
 
     @NotBlank( message = "dont post empty msg" )
-    String message;
+    private String message;
 
     @NotBlank( message = "cant assign with sender==null" )
-    String sender;
+    private String sender;
 
 }

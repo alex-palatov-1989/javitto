@@ -33,13 +33,13 @@ abstract public class PostDAO {
     }            
 
     final class UserPostDAO extends FullPostDAO implements IPostDAO<UserPost>{
-        public void     edit (UserPost post, String key) throws Exception {
+        public void     edit (UserPost post, String key)    throws Exception {
             write( key, post, db() );
         }
-        public String   create  (UserPost post)          throws Exception{
+        public String   create  (UserPost post)             throws Exception{
             return create( post, db() );    
         }
-        public UserPost  get (String key)   throws Exception{
+        public UserPost  get (String key)                   throws Exception{
             return read( key, db() );    
         }
         @Override
@@ -52,7 +52,7 @@ abstract public class PostDAO {
         public String    create (MarketPost post)          throws Exception{
             return create( post, db());    
         }
-        public MarketPost  get (String key)   throws Exception{
+        public MarketPost  get (String key)                throws Exception{
             return read( key, db() );    
         }
         @Override

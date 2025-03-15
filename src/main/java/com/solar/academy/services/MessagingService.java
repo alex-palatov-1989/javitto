@@ -7,7 +7,7 @@ import com.solar.academy.models.messages.Answer;
 import com.solar.academy.models.messages.Message;
 import com.solar.academy.models.messages.Review;
 
-import com.solar.academy.dto.messages.IMessageDTO;
+import com.solar.academy.dto.RequestBase;
 import com.solar.academy.dto.messages.AnswerDTO;
 import com.solar.academy.dto.messages.LetterDTO;
 import com.solar.academy.dto.messages.ReviewDTO;
@@ -27,7 +27,7 @@ public class MessagingService {
 
     /*==============================================================*/
     public
-    Optional<Exception> addStringMessage(IMessageDTO req){
+    Optional<Exception> addStringMessage(RequestBase req){
         try{
             req.setDatetime( LocalDateTime.now() );
             if( req instanceof ReviewDTO){
@@ -52,7 +52,7 @@ public class MessagingService {
     }
     /*---------------------------------------------------------------*/
     public
-    Optional<Exception> editStringMessage(IMessageDTO req){
+    Optional<Exception> editStringMessage(RequestBase req){
         try{
             if( req instanceof ReviewDTO){
                 Review post = mapper.toReview((ReviewDTO) req);
@@ -76,7 +76,7 @@ public class MessagingService {
     }
     /*---------------------------------------------------------------*/
     public
-    Optional<Exception> deleteStringMessage(IMessageDTO req){
+    Optional<Exception> deleteStringMessage(RequestBase req){
         try{
             if( req instanceof ReviewDTO){
                 Review post = mapper.toReview((ReviewDTO) req);

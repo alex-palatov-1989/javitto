@@ -45,28 +45,46 @@ final public class PostRepository extends PostDAO implements IPostRepository{
         try {
             var skip = new HashSet<Integer>();
             if(flags.inUsers){      
-                if(flags.byHead)    search.putAll(users.getByHeader (tag, users.dataclass(), null));
-                skip.addAll(search.keySet());
+                if(flags.byHead)
+                {
+                    search.putAll(users.getByHeader (tag, users.dataclass(), null));
+                    skip.addAll(search.keySet());
+                }
+                if(flags.byCat)
+                {
+                    search.putAll(users.getByTag     (tag, users.dataclass(),
+                            skip.isEmpty() ? null : skip
+                        ));
+                    skip.addAll(search.keySet());
+                }
+                if(flags.byText)
+                    search.putAll(users.getByText    (tag, users.dataclass(),
+                            skip.isEmpty() ? null : skip
+                        ));
 
-                if(flags.byCat)     search.putAll(users.getByTag     (tag, users.dataclass(), skip));
-                skip.addAll(search.keySet());
-
-                if(flags.byText)    search.putAll(users.getByText    (tag, users.dataclass(), skip));
+                ret.addAll(search.values());
                 skip.clear();
-
-            ret.addAll(search.values());
             }
             if(flags.onMarket){     
-                if(flags.byHead)    search.putAll(markets.getByHeader  (tag, markets.dataclass(), null));
-                skip.addAll(search.keySet());
+                if(flags.byHead)
+                {
+                    search.putAll(markets.getByHeader  (tag, markets.dataclass(), null));
+                    skip.addAll(search.keySet());
+                }
+                if(flags.byCat)
+                {
+                    search.putAll(markets.getByTag      (tag, markets.dataclass(),
+                            skip.isEmpty() ? null : skip
+                        ));
+                    skip.addAll(search.keySet());
+                }
+                if(flags.byText)
+                    search.putAll(markets.getByText     (tag, markets.dataclass(),
+                            skip.isEmpty() ? null : skip
+                        ));
 
-                if(flags.byCat)    search.putAll(markets.getByTag      (tag, markets.dataclass(), skip));
-                skip.addAll(search.keySet());
-                
-                if(flags.byText)   search.putAll(markets.getByText     (tag, markets.dataclass(), skip));
+                ret.addAll(search.values());
                 skip.clear();
-
-            ret.addAll(search.values());
             }            
         } catch   ( Exception e  ) {     e.printStackTrace();
         } finally { System.gc(); }           
