@@ -5,6 +5,8 @@ import com.solar.academy.dto.PromoDTO;
 import com.solar.academy.models.posts.BasePost;
 import com.solar.academy.models.posts.FullPost;
 
+import com.solar.academy.models.posts.MarketPost;
+import com.solar.academy.models.posts.UserPost;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.context.annotation.Scope;
@@ -35,7 +37,8 @@ public interface PostMapper {
     @Mapping(target = "description",    source = "description"  )
     @Mapping(target = "rootComment",    source = "rootComment"  )
 
-    PromoDTO toFull       (FullPost req);
-                                        // page of opened post
+    PromoDTO toFull             (FullPost req);       // page of opened pos
+    FullPost toTemplatePost     (PromoDTO req);       // POST req template
+
     /*=======================================================*/
 }

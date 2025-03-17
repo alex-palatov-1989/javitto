@@ -3,6 +3,7 @@ package com.solar.academy.cache;
 
 import com.solar.academy.dao.AbstractDAO;
 import com.solar.academy.dao.IRelative;
+import com.solar.academy.dao.TMP;
 import com.solar.academy.models.BaseID;
 import lombok.Getter;
 
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+
 
 @Component
 public class Cache implements AutoCloseable{
@@ -101,15 +104,6 @@ public class Cache implements AutoCloseable{
 
     public static void main(String[] args) {
 
-        class TMP extends BaseID {
-
-            @Getter @Setter
-            public String  name = "alex";
-
-            @IRelative.ToList
-            transient public List<TMP> linked = null;
-        }
-
         try (Cache db = new Cache();){
             var dao = new AbstractDAO(){
                 @Override
@@ -142,7 +136,7 @@ public class Cache implements AutoCloseable{
             keys.stream().forEach(
                     k-> {
                         try {
-                            TMP val = dao.read(k, db);
+                            TMP val = (TMP)dao.read(k, db);
                             if(val == null) throw new NullPointerException();
                             el.add( val );
                         } catch (Exception e) {

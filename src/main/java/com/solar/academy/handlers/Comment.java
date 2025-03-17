@@ -1,30 +1,31 @@
 package com.solar.academy.handlers;
 
-import lombok.NoArgsConstructor;
-import netscape.javascript.JSObject;
-import org.json.JSONObject;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class Comment extends StringTree {
-    
-    @Leaf private String sender; 
-    @Leaf private String text;
-    final Set<Integer> idxs = new HashSet<>();
-    static int getRnd(){ return Math.abs(UUID.randomUUID().hashCode()); }
 
+    @Getter @Setter
+    @Leaf private String sender;
+
+    @Getter @Setter
+    @Leaf private String text;
+
+    final Set<Long> idxs = new HashSet<>();
+    static long getRnd(){ return UUID.randomUUID().getLeastSignificantBits(); }
+
+    public
     Comment(){ this(0, null, null); }
-    Comment(int id, String sender, String text) {
+    Comment(long id, String sender, String text) {
         super( String.valueOf(id) );
         this.sender = sender;
         this.text = text;
     }
     public Comment addChild(String sender, String text) {
-        Integer id;
+        long id;
         synchronized( idxs ){            
             do id = getRnd();
             while( idxs.contains(id) );            
@@ -35,28 +36,19 @@ public class Comment extends StringTree {
         children.put(String.valueOf(id), child);
         return child;
     }
-    public Comment findById(String id) {
+    public Comment findById(String id) throws NoSuchElementException{
         if( this.id.equals(id) ){
             return this;
         } else {
             return children.values().stream()
-                    .map(child -> ((Comment)child).findById(id))
-                    .filter(Objects::nonNull)
-                    .findFirst().orElse( null );
+                   .map(child -> ((Comment)child).findById(id))
+                   .filter(Objects::nonNull).toList().getFirst();
         }
     }
-    public void deleteByid(String id) {
-
-        Comment del = findById(id);
+    public void deleteById(String id) {
+        var del = findById(id);
         if( del!=null ){
-            Comment upper = (Comment)del.getParent();
-            if( upper!=null ){
-                del.getChildren().values().forEach(child -> {
-                    child.setParent(upper);
-                    upper.children.put(child.id, child);
-                });
-                upper.children.remove(id);
-            }
+            del.getParent().children.remove(del.id);
         }
     }
 }

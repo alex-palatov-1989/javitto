@@ -26,8 +26,8 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
     private final RocksDB _db;
     private final WriteOptions writeSinc = new WriteOptions();
     public RocksImplementation(RocksDB db, HashMap<String,ColumnFamilyHandle> map)
-    {   
-        _db = db; mapped = map; 
+    {
+        _db = db; mapped = map;
         writeSinc.setSync(false);
     }
     /*  =================================================================  */
@@ -73,7 +73,7 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
             final var k = key.getBytes();
             final var v = _db.get( k );
             return v==null ? null : new String(v);
-        }        
+        }
     }
     public void putBytes(String key, String val) throws Exception {
         synchronized (_db) {
@@ -128,7 +128,7 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
 
             final var table = getTable( type );
             synchronized (_db){
-                    writeBatch.put( table, key.getBytes(), toJSON(val) );
+                writeBatch.put( table, key.getBytes(), toJSON(val) );
             }
         } catch (Exception e) { e.printStackTrace();
         }
@@ -237,57 +237,57 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
 
     /*  =================================================================  */
 
-    <T> Stream<Entry<T>> getStream(RocksIterator it, Snapshot snap, Class<T> clazz, Set<Integer> skipKeys ){                
+    <T> Stream<Entry<T>> getStream(RocksIterator it, Snapshot snap, Class<T> clazz, Set<Integer> skipKeys ){
         final var all  = skipKeys==null;
         final var skip = skipKeys;
-        it.seekToFirst();        
+        it.seekToFirst();
 
-        return Stream.generate(() -> {            
-            if( !it.isValid() ) return null;
+        return Stream.generate(() -> {
+                    if( !it.isValid() ) return null;
 
-            final var record = new Entry<T>( it.key() );
+                    final var record = new Entry<T>( it.key() );
 
-            if( all ||  !skip.contains( record.key ) )
-            record.data = fromJSON( it.value(), clazz);            
-            
-            it.next();            
-            return record;
-        })        
-        .takeWhile(Objects::nonNull).filter(e-> e.data!=null )
-        .onClose( ()->{ it.close();snap.close(); } );
-    }  
-    public <T> HashMap<Integer, T> getAll (Class<T> clazz) throws Exception {    
+                    if( all ||  !skip.contains( record.key ) )
+                        record.data = fromJSON( it.value(), clazz);
+
+                    it.next();
+                    return record;
+                })
+                .takeWhile(Objects::nonNull).filter(e-> e.data!=null )
+                .onClose( ()->{ it.close();snap.close(); } );
+    }
+    public <T> HashMap<Integer, T> getAll (Class<T> clazz) throws Exception {
         final var table = getTable(clazz);
         final var snap  = getSnap();
         final var rd = new ReadOptions(); rd.setSnapshot(snap).setAsyncIo(true);
         Stream<Entry<T>> stream;
         synchronized (_db) {
-            stream = getStream( _db.newIterator( table, rd ), snap, clazz, null );        
+            stream = getStream( _db.newIterator( table, rd ), snap, clazz, null );
         }
         return (HashMap<Integer, T>) stream.collect(Collectors.toMap(e->e.key, e->e.data));
     }
     public <T> HashMap<Integer , T> equal
-        ( 
-            Class<T>    clazz,      String          field, 
-            Object      value,      Set<Integer>    skipKeys 
-        ) throws Exception {
+            (
+                    Class<T>    clazz,      String          field,
+                    Object      value,      Set<Integer>    skipKeys
+            ) throws Exception {
         return filter(
-                clazz, field, value, 
+                clazz, field, value,
                 Object::equals,
                 skipKeys
-            );
+        );
     }
     public <T>  HashMap<Integer, T> filter
-        ( 
-            Class<T> clazz,  String field,  Object value, 
-            Predicate pred,  Set<Integer>   skipKeys
-        ) throws Exception {
+            (
+                    Class<T> clazz,  String field,  Object value,
+                    Predicate pred,  Set<Integer>   skipKeys
+            ) throws Exception {
 
-        String method="get"+field.substring(0, 1).toUpperCase() + field.substring(1);        
-        final  Method  get;   
-        try {   
-                get   = clazz.getDeclaredMethod( method );                
-        } catch (Exception e) { 
+        String method="get"+field.substring(0, 1).toUpperCase() + field.substring(1);
+        final  Method  get;
+        try {
+            get   = clazz.getDeclaredMethod( method );
+        } catch (Exception e) {
             System.err.println("Not found: "+e.getMessage());
             return new HashMap<>();
         }
@@ -298,52 +298,44 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
             stream = getStream( _db.newIterator( table, rd ), snap, clazz, skipKeys );
         }
         return (HashMap<Integer, T>) stream.filter(
-            (element) -> {                                                       
-                try {    return pred.filter(get.invoke(element.data, (Object[])null), value);                    
-                }   catch (Exception e) {   return false;   }                                                         
-            }
+                (element) -> {
+                    try {    return pred.filter(get.invoke(element.data, (Object[])null), value);
+                    }   catch (Exception e) {   return false;   }
+                }
         ).collect(  Collectors.toMap(e->e.key, e->e.data)    );
-    }    
+    }
 
     /*  =================================================================  */
 
     public <T> String getNewKey(T val){
-        synchronized (_db) {         
+        synchronized (_db) {
             try {
                 byte[] id;      // using "default" table !
                 do id  = getID( UUID.randomUUID() );
-                while( _db.get( id )!=null );                
+                while( _db.get( id )!=null );
                 _db.put( id, new byte[]{0} );
                 return Integer.toHexString(setID(id));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
-            }   
+            }
         }
     }
     private byte[] getID(UUID rnd){
-        return getID( rnd.getMostSignificantBits(), rnd.getLeastSignificantBits() );
+        return getID( rnd.getLeastSignificantBits() );
     }
     private Integer setID(byte[] arr){
-        return  ((arr[0] & 0xFF) << 56) |
-                ((arr[1] & 0xFF) << 48) |
-                ((arr[2] & 0xFF) << 40) |
-                ((arr[3] & 0xFF) << 32) |
-                ((arr[4] & 0xFF) << 24) |
-                ((arr[5] & 0xFF) << 16) |
-                ((arr[6] & 0xFF) << 8)  |
-                ( arr[7] & 0xFF);
+        return  ((arr[0] & 0xFF) << 24) |
+                ((arr[1] & 0xFF) << 16) |
+                ((arr[2] & 0xFF) << 8 ) |
+                ((arr[3] & 0xFF) << 0 ) ;
     }
-    private byte[] getID(long val1, long val2){
+    private byte[] getID(long val){
         return new byte[] {
-                (byte) (val1 >> 56),
-                (byte) (val1 >> 48),
-                (byte) (val1 >> 40),
-                (byte) (val1 >> 32),
-                (byte) (val2 >> 24),
-                (byte) (val2 >> 16),
-                (byte) (val2 >> 8),
-                (byte)  val2
+                (byte) (val >> 24),
+                (byte) (val >> 16),
+                (byte) (val >> 8),
+                (byte)  val
         };
     }
 }

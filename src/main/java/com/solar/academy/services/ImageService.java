@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class ImageService {
     ImageRepository db;
-    public ResponseEntity<?> get( String id ) throws Exception{
+    public ResponseEntity<?> get( String id ) {
         try{
             var image = db.load(id);
             return image == null ?
@@ -24,7 +24,7 @@ public class ImageService {
             return ResponseEntity.internalServerError().body( e.getMessage() );
         }
     }
-    public ResponseEntity<?> post( MultipartFile img )       throws Exception{
+    public ResponseEntity<?> post( MultipartFile img )       {
         try {
             db.saveImage(img);
         } catch (Exception e) {
@@ -33,7 +33,7 @@ public class ImageService {
         }
         return ResponseEntity.ok().build();
     }
-    public ResponseEntity<?> post( List<MultipartFile> img ) throws Exception{
+    public ResponseEntity<?> post( List<MultipartFile> img ) {
         try {
             db.saveImages(img);
         } catch (Exception e) {

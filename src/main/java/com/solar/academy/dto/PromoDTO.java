@@ -4,7 +4,7 @@ package com.solar.academy.dto;
 import com.solar.academy.dto.messages.AnswerDTO;
 import com.solar.academy.dto.messages.ReviewDTO;
 import com.solar.academy.handlers.Comment;
-import com.solar.academy.models.posts.BasePost;
+import com.solar.academy.models.BaseID;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -40,7 +40,7 @@ public class PromoDTO extends RequestBase{
     String description;
 
 
-    List<String>        photos;
+    List<BaseID>        photos;
     List<ReviewDTO>     reviews;
     List<AnswerDTO>     answers;
     List<PromoDTO>      related;

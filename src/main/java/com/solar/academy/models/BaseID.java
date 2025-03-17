@@ -8,32 +8,25 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-
 @Data
-public class BaseID implements Serializable {
-    private Integer id  =0;
-    private String  host="";
+public class BaseID {
 
+    String  id   ;
+    String  host ;
 
-    public  String  getKey()
+    @JsonIgnore public  String  getKey()
     {
-        return Integer.toHexString(id);
+        return id;
     }
     @JsonIgnore public  BaseID  setKey(Integer i)
     {
-        id = i;
-        return this;
-    }
-    @JsonIgnore     public BaseID setHost(String str)
-    {
-        host = str;
+        id = Integer.toString(i,16);
         return this;
     }
     @JsonIgnore     public BaseID setKey(String str) {
-        id = Integer.parseUnsignedInt(str, 16);
+        id = str;
         return this;
     }
 
-    public
-    LocalDateTime datetime;
+    public LocalDateTime datetime;
 }

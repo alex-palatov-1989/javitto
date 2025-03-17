@@ -1,7 +1,8 @@
 package com.solar.academy.cache;
 
-import java.util.HashMap;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface IQuerySide {
@@ -13,13 +14,13 @@ public interface IQuerySide {
     public void delete (String key, Class<?> clazz)                         throws Exception;
     public void deleteBytes  ( String hshKey )                              throws Exception;
 
-    public <T> HashMap<Integer , T> getAll( Class<T> clazz )                throws Exception;
-    public <T> HashMap<Integer , T> equal ( Class<T> clazz, 
+    public <T> Map<Integer , T> getAll(Class<T> clazz )                throws Exception;
+    public <T> Map<Integer , T> equal (Class<T> clazz,
         String field,   Object value, 
-        Set<Integer>    skipKeys)       throws Exception ;   
+        Set<Integer>       skipKeys)       throws Exception ;
 
 
-    public <T> HashMap<Integer , T> filter( Class<T> clazz, 
+    public <T> Map<Integer , T> filter(Class<T> clazz,
         String field, Object value, 
         Predicate       pred, 
         Set<Integer>    skipKeys)       throws Exception ;

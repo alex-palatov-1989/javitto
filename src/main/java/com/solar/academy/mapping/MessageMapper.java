@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-
-
 @Component  @Scope("prototype")
 @Mapper( componentModel = "spring" )
 public interface MessageMapper {

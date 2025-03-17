@@ -13,9 +13,11 @@ import com.solar.academy.cache.Cache;
 import com.solar.academy.models.BaseID;
 import lombok.AllArgsConstructor;
 
-public interface AbstractDAO {
+public interface AbstractDAO<T>{
 
-    Class<?> dataclass();
+    default Class<?> dataclass() throws ClassNotFoundException {
+        return Class.forName( AbstractDAO.class.getTypeParameters()[0].getTypeName());
+    };
 
     default void putNewKey(String host, String key, Cache db) throws Exception{
 
@@ -80,7 +82,8 @@ public interface AbstractDAO {
         
         try {                   
             final var key = db.api().getNewKey(value);
-            ((BaseID) value).setKey(key);            
+            ((BaseID) value).setKey(key);
+
             var fibers = colls.parallelStream().map(
                 (g)->{
                     try {                        
@@ -123,7 +126,7 @@ public interface AbstractDAO {
         }   
     }   
 
-    default <T> T read(String key, Cache db) throws Exception{
+    default <T> T read(String key, Cache db) {
 
         Exception[] err = {null};
         var colls = createMap();

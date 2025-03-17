@@ -21,7 +21,7 @@ public class StringTree {
     @Retention(RetentionPolicy.RUNTIME)
     @interface Leaf{}    
 
-    protected String id = null;
+    public String id = null;
 
     @Getter @Setter
     protected StringTree parent;
@@ -32,8 +32,6 @@ public class StringTree {
         this.children   = new HashMap<>();
         this.parent     = null;
     }
-    public String tag(){ return id; }
-
 
     private
     Stream<Field> getLeafs(){

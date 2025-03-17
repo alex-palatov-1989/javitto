@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.solar.academy.handlers.Comment;
 import com.solar.academy.handlers.CommentSerializer;
+import com.solar.academy.models.BaseID;
 import lombok.Data;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class FullPost extends BasePost{
     List<BasePost>      related;
 
     @IRelative.ToList
-    public List<String> photos;
+    public List<BaseID> photos;
 
     public String       description;
 

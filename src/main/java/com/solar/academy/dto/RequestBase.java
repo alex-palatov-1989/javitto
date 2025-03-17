@@ -9,6 +9,10 @@ import java.time.LocalDateTime;
 public abstract class RequestBase
 {
     LocalDateTime datetime;
-    @NotBlank Integer id;
-    @NotBlank String host;
+
+    @NotBlank ( message = "err cause id is empty" )
+    Integer id;
+
+    @NotBlank ( message = "err cause host is empty" )
+    String host;
 }

@@ -1,9 +1,6 @@
 package com.solar.academy.dao.posts;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import com.solar.academy.cache.Cache;
 import com.solar.academy.models.posts.BasePost;
@@ -17,8 +14,7 @@ final public class PostRepository extends PostDAO implements IPostRepository{
     @Getter MarketPostDAO    markets;
             Cache            _db;
 
-    @Override
-    synchronized Cache db() {
+    @Override synchronized Cache db() {
         return  _db;
     }
 
@@ -39,52 +35,57 @@ final public class PostRepository extends PostDAO implements IPostRepository{
     }
 
     public List<BasePost>  findText(String tag, SearchFlags flags){
-        var search = new HashMap<Integer, BasePost>();            
-        var ret = new ArrayList<BasePost>();      
+        var search  = new HashMap<Integer, Object>();
+        var ret     = new ArrayList<BasePost>();
 
         try {
             var skip = new HashSet<Integer>();
             if(flags.inUsers){      
                 if(flags.byHead)
                 {
-                    search.putAll(users.getByHeader (tag, users.dataclass(), null));
+                    search.putAll(users.getByHeader (tag, null));
                     skip.addAll(search.keySet());
                 }
                 if(flags.byCat)
                 {
-                    search.putAll(users.getByTag     (tag, users.dataclass(),
+                    search.putAll(users.getByTag    (tag,
                             skip.isEmpty() ? null : skip
                         ));
                     skip.addAll(search.keySet());
                 }
                 if(flags.byText)
-                    search.putAll(users.getByText    (tag, users.dataclass(),
+                    search.putAll(users.getByText   (tag,
                             skip.isEmpty() ? null : skip
                         ));
 
-                ret.addAll(search.values());
-                skip.clear();
+                search.values().stream()
+                        .map(e->(BasePost)e)
+                        .forEach(e->ret.add(e));
             }
+
+            skip.clear();   search.clear();
+
             if(flags.onMarket){     
                 if(flags.byHead)
                 {
-                    search.putAll(markets.getByHeader  (tag, markets.dataclass(), null));
+                    search.putAll(markets.getByHeader  (tag, null));
                     skip.addAll(search.keySet());
                 }
                 if(flags.byCat)
                 {
-                    search.putAll(markets.getByTag      (tag, markets.dataclass(),
+                    search.putAll(markets.getByTag  (tag,
                             skip.isEmpty() ? null : skip
                         ));
                     skip.addAll(search.keySet());
                 }
                 if(flags.byText)
-                    search.putAll(markets.getByText     (tag, markets.dataclass(),
+                    search.putAll(markets.getByText (tag,
                             skip.isEmpty() ? null : skip
                         ));
 
-                ret.addAll(search.values());
-                skip.clear();
+                search.values().stream()
+                        .map(e->(BasePost)e)
+                        .forEach(e->ret.add(e));
             }            
         } catch   ( Exception e  ) {     e.printStackTrace();
         } finally { System.gc(); }           

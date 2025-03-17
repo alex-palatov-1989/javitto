@@ -58,7 +58,7 @@ public class CategoryService {
     public  String find( String tag )
     {
         synchronized (category){
-            return  getTag().findById(tag).tag();
+            return  getTag().findById(tag).id;
         }
     }
     public  String path( String tag )
