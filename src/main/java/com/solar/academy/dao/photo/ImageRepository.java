@@ -12,8 +12,8 @@ import java.util.*;
 public class ImageRepository implements AutoCloseable{
     private final String    DB_PATH = "/tmp/image_storage";
     private final Integer   cores   = 4;
-    private RocksDB db;
-    private Options deflt = new Options();
+    private  RocksDB db;
+    private  Options deflt = new Options();
     @Override public void close(){ db.close(); }
 
     public ImageRepository()  {

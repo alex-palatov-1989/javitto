@@ -82,6 +82,7 @@ public class Cache implements AutoCloseable{
         }   catch (RocksDBException e) { e.printStackTrace();
         }   finally {
             System.err.println(" Cache instance loaded at "+DB_PATH);
+            System.err.println(">_cache = "+this);
         }
     }    
 

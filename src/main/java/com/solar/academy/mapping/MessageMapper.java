@@ -23,7 +23,6 @@ public interface MessageMapper {
     @Mapping(target = "message",    source = "message")
     @Mapping(target = "postID",     source = "postID")
     @Mapping(target = "id",         source = "id"  )
-    @Mapping(target = "host",       source = "host")
     /*=======================================================*/
 
     Answer toAnswer(AnswerDTO req);

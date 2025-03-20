@@ -50,7 +50,7 @@ public class CategoryService {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            System.err.println(
+            System.err.println( "\n>_Category tags:\n"+
                     category.toJSON().toString(5)
             );
         }

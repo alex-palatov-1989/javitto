@@ -1,5 +1,5 @@
 package com.solar.academy.validation;
-import com.solar.academy.UserController;
+import com.solar.academy.controllers.UserController;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

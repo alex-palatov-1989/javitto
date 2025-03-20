@@ -3,11 +3,13 @@ package com.solar.academy.services;
 import com.solar.academy.dao.posts.IPostRepository;
 import com.solar.academy.dto.CommentRequest;
 import com.solar.academy.handlers.Comment;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.NoSuchElementException;
 
-@Service
+@Service @NoArgsConstructor
 public class CommentService {
 
     public ResponseEntity<?> add(CommentRequest req) {
@@ -26,13 +28,13 @@ public class CommentService {
             var users = repository.getUsers().get(req.getPostID());
             if (users.isPresent()) {
                 var res = op.run( req, users.get().getRootComment() );
-                repository.getUsers().edit(users.get(), users.get().getKey());
+                repository.getUsers().edit(users.get(), users.get().getId());
                 return res;
             }
             var market = repository.getMarkets().get(req.getPostID());
             if (market.isPresent()) {
                 var res = op.run( req, market.get().getRootComment() );
-                repository.getUsers().edit(users.get(), users.get().getKey());
+                repository.getUsers().edit(users.get(), users.get().getId());
                 return res;
             }
         } catch (NoSuchElementException e) {

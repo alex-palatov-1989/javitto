@@ -7,17 +7,21 @@ import com.solar.academy.models.messages.Answer;
 import com.solar.academy.models.messages.Message;
 import com.solar.academy.models.messages.Review;
 
-import com.solar.academy.dto.RequestBase;
+import com.solar.academy.dto.messages.MessageBase;
 import com.solar.academy.dto.messages.AnswerDTO;
 import com.solar.academy.dto.messages.LetterDTO;
 import com.solar.academy.dto.messages.ReviewDTO;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @Service
+@AllArgsConstructor
 public class MessagingService {
     IMessageRepository  repository;
     MessageMapper       mapper;
@@ -27,41 +31,42 @@ public class MessagingService {
 
     /*==============================================================*/
     public
-    Optional<Exception> addStringMessage(RequestBase req){
+    Optional<Exception> addStringMessage(MessageBase req, StringBuilder id){
         try{
-            req.setDatetime( LocalDateTime.now() );
-            if( req instanceof ReviewDTO){
+            String key = null;
+            if( req instanceof ReviewDTO  ){
                 Review post = mapper.toReview((ReviewDTO) req);
-                repository.getReviews().create(post, post.getPostID());
-                return returnError();
+                key = repository.getReviews().create(post, post.getPostID());
             }
             if( req instanceof AnswerDTO ){
                 Answer post = mapper.toAnswer((AnswerDTO) req);
-                repository.getAnswers().create(post, post.getPostID());
-                return returnError();
+                key = repository.getAnswers().create(post, post.getPostID());
             }
-            if( req instanceof LetterDTO){
+            if( req instanceof LetterDTO ){
                 Message post = mapper.toMessage((LetterDTO) req);
-                repository.getLetters().create(post, post.getSeller());
-                return returnError();
+                key = repository.getLetters().create(post, post.getSeller());
             }
-            return returnError("unrecognized request type");
+            if(Objects.isNull(key))
+                return returnError("unrecognized request type or other error");
+            else
+                id.append( key );
 
+            return returnError();
         } catch (Exception e) { return returnError(e);
         }
     }
     /*---------------------------------------------------------------*/
     public
-    Optional<Exception> editStringMessage(RequestBase req){
+    Optional<Exception> editStringMessage(MessageBase req){
         try{
             if( req instanceof ReviewDTO){
                 Review post = mapper.toReview((ReviewDTO) req);
-                repository.getReviews().edit(post, post.getPostID());
+                repository.getReviews().edit(post, post.getId());
                 return returnError();
             }
             if( req instanceof AnswerDTO ){
                 Answer post = mapper.toAnswer((AnswerDTO) req);
-                repository.getAnswers().edit(post, post.getPostID());
+                repository.getAnswers().edit(post, post.getId());
                 return returnError();
             }
             if( req instanceof LetterDTO){
@@ -76,21 +81,21 @@ public class MessagingService {
     }
     /*---------------------------------------------------------------*/
     public
-    Optional<Exception> deleteStringMessage(RequestBase req){
+    Optional<Exception> deleteStringMessage(MessageBase req){
         try{
             if( req instanceof ReviewDTO){
                 Review post = mapper.toReview((ReviewDTO) req);
-                repository.getReviews().delete( post.getPostID(), post.getKey());
+                repository.getReviews().delete( post.getPostID(), post.getId());
                 return returnError();
             }
             if( req instanceof AnswerDTO ){
                 Answer post = mapper.toAnswer((AnswerDTO) req);
-                repository.getAnswers().delete( post.getPostID(), post.getKey());
+                repository.getAnswers().delete( post.getPostID(), post.getId());
                 return returnError();
             }
-            if( req instanceof LetterDTO){
+            if( req instanceof LetterDTO){ System.err.println("here");
                 Message post = mapper.toMessage((LetterDTO) req);
-                repository.getLetters().delete( post.getSeller(), post.getKey() );
+                repository.getLetters().delete( post.getSeller(), post.getId() );
                 return returnError();
             }
             return returnError("unrecognized request type");

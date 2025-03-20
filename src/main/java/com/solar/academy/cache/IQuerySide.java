@@ -12,7 +12,7 @@ public interface IQuerySide {
     public <T> List<T> getPrivate(String hostId, Class<?> clazz)            throws Exception ;
 
     public void delete (String key, Class<?> clazz)                         throws Exception;
-    public void deleteBytes  ( String hshKey )                              throws Exception;
+    public void deleteBytes  ( String hshKey, boolean now )                 throws Exception;
 
     public <T> Map<Integer , T> getAll(Class<T> clazz )                throws Exception;
     public <T> Map<Integer , T> equal (Class<T> clazz,

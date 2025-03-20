@@ -4,19 +4,25 @@ import java.util.*;
 
 import com.solar.academy.cache.Cache;
 import com.solar.academy.models.posts.BasePost;
+import com.solar.academy.models.posts.MarketPost;
+import com.solar.academy.models.posts.UserPost;
+import jakarta.annotation.PostConstruct;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-@Repository
-final public class PostRepository extends PostDAO implements IPostRepository{
-        
-    @Getter UserPostDAO      users;
-    @Getter MarketPostDAO    markets;
-            Cache            _db;
 
-    @Override synchronized Cache db() {
-        return  _db;
-    }
+@Repository @AllArgsConstructor
+final public class PostRepository implements IPostRepository{
+    @PostConstruct void print(){
+        System.err.println( this+String.format(
+        "\n>_repository\t= %s\n>_repository\t= %s\n", users, markets)
+    );}
+    @Getter PostDAO.UserPostDAO     users;
+    @Getter PostDAO.MarketPostDAO   markets;
+
 
     public SearchFlags     getFlags()                   { return new SearchFlags(); }
     public List<BasePost>  defaultSearch(String tag)    { return findText(tag, getFlags()); }
@@ -43,18 +49,18 @@ final public class PostRepository extends PostDAO implements IPostRepository{
             if(flags.inUsers){      
                 if(flags.byHead)
                 {
-                    search.putAll(users.getByHeader (tag, null));
+                    search.putAll(getUsers().getByHeader (tag, null));
                     skip.addAll(search.keySet());
                 }
                 if(flags.byCat)
                 {
-                    search.putAll(users.getByTag    (tag,
+                    search.putAll(getUsers().getByTag    (tag,
                             skip.isEmpty() ? null : skip
                         ));
                     skip.addAll(search.keySet());
                 }
                 if(flags.byText)
-                    search.putAll(users.getByText   (tag,
+                    search.putAll(getUsers().getByText   (tag,
                             skip.isEmpty() ? null : skip
                         ));
 
@@ -68,18 +74,18 @@ final public class PostRepository extends PostDAO implements IPostRepository{
             if(flags.onMarket){     
                 if(flags.byHead)
                 {
-                    search.putAll(markets.getByHeader  (tag, null));
+                    search.putAll(getMarkets().getByHeader  (tag, null));
                     skip.addAll(search.keySet());
                 }
                 if(flags.byCat)
                 {
-                    search.putAll(markets.getByTag  (tag,
+                    search.putAll(getMarkets().getByTag  (tag,
                             skip.isEmpty() ? null : skip
                         ));
                     skip.addAll(search.keySet());
                 }
                 if(flags.byText)
-                    search.putAll(markets.getByText (tag,
+                    search.putAll(getMarkets().getByText (tag,
                             skip.isEmpty() ? null : skip
                         ));
 

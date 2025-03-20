@@ -1,12 +1,14 @@
 package com.solar.academy.dto.messages;
 
-import com.solar.academy.dto.RequestBase;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Data
-@AllArgsConstructor @NoArgsConstructor
-public class AnswerDTO extends RequestBase {
+public class AnswerDTO extends MessageBase {
 
     @NotBlank( message = "cant assign with postID==null" )
     private String postID;

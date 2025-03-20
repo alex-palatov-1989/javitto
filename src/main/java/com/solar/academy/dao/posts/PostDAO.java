@@ -10,17 +10,32 @@ import com.solar.academy.cache.IQuerySide;
 import com.solar.academy.models.posts.BasePost;
 import com.solar.academy.models.posts.MarketPost;
 import com.solar.academy.models.posts.UserPost;
+import jakarta.annotation.PostConstruct;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 @SuppressWarnings ("unchecked")
-abstract public class PostDAO {
+@Repository
+final public class PostDAO {
+    @PostConstruct void print() {
+        System.err.println(this+"\n>_cache\t= " + _db);
+        System.err.println('\n');
+    }
+    @Autowired   Cache  _db;
+    Cache  db(){ return _db; }
 
-    abstract Cache db();
     IQuerySide.Predicate containStr = new IQuerySide.Predicate() {
         @Override public boolean filter(Object rec, Object  arg){
             return ((String) rec).contains((String)arg);
         }
     };
 
+    @Component @NoArgsConstructor
     final class UserPostDAO extends FullPostDAO<UserPost>
     implements IPostDAO<UserPost>{
         public void     edit    (UserPost post, String key) throws Exception {
@@ -35,8 +50,10 @@ abstract public class PostDAO {
             return Optional.ofNullable(read( key, db() ));
         }
     }
+
+    @Component @NoArgsConstructor
     final class MarketPostDAO extends  FullPostDAO<MarketPost>
-    implements  IPostDAO<MarketPost>{
+    implements IPostDAO<MarketPost>{
         public void     edit    (MarketPost post, String key) throws Exception{
             synchronized (mtx){
                 write( key, post, db());

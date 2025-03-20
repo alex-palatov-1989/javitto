@@ -2,6 +2,7 @@ package com.solar.academy.dto;
 
 
 import com.solar.academy.dto.messages.AnswerDTO;
+import com.solar.academy.dto.messages.MessageBase;
 import com.solar.academy.dto.messages.ReviewDTO;
 import com.solar.academy.handlers.Comment;
 import com.solar.academy.models.BaseID;
@@ -19,7 +20,7 @@ import java.util.List;
 @Builder
 @Data
 
-public class PromoDTO extends RequestBase{
+public class PromoDTO extends MessageBase {
 
     @NotBlank ( message = "dont add posters without image" )
     String mainImg;

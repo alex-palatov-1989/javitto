@@ -55,7 +55,7 @@ public interface AbstractDAO<T>{
                                 (item)->{
                                     try {
                                         final var rec = (BaseID)item;
-                                        db.executor().put( key+rec.getKey(), item );
+                                        db.executor().put( key+rec.getId(), item );
                                     } catch (Exception e) { e.printStackTrace();
                                     }
                                 });                            
@@ -82,7 +82,7 @@ public interface AbstractDAO<T>{
         
         try {                   
             final var key = db.api().getNewKey(value);
-            ((BaseID) value).setKey(key);
+            ((BaseID) value).setId(key);
 
             var fibers = colls.parallelStream().map(
                 (g)->{

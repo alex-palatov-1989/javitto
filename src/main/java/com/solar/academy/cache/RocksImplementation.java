@@ -112,7 +112,7 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
                 _db.put(id, new byte[]{0});
             }
             if(val instanceof BaseID)
-                ((BaseID) val).setKey( setID(id) );
+                ((BaseID) val).setId( Integer.toHexString(setID(id)) );
             writeBatch.put( table, id, toJSON(val) );
 
             return new String(id);
@@ -165,11 +165,12 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
     }
 
     /*  =================================================================  */
-    public void deleteBytes( String key) throws Exception {
+    public void deleteBytes( String key, boolean now ) throws Exception {
         try {
             synchronized (_db){
                 writeBatch.delete( key.getBytes());
             }
+            if( now ) commit();
         } catch (RocksDBException e) { e.printStackTrace(); throw e;
         }
     }
@@ -210,9 +211,10 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
             ColumnFamilyHandle table = getTable(clazz);
             final var id = getNewKey(null);
             if(value instanceof BaseID)
-                ((BaseID) value)
-                        .setKey( id )
-                        .setHost(hostId);
+            {
+                ((BaseID) value).setId( id );
+                ((BaseID) value).setHost(hostId);
+            }
 
             final var data = toJSON(value);
             synchronized (_db) {
@@ -313,8 +315,10 @@ public class RocksImplementation implements IQuerySide, ICommandSide{
                 byte[] id;      // using "default" table !
                 do id  = getID( UUID.randomUUID() );
                 while( _db.get( id )!=null );
-                _db.put( id, new byte[]{0} );
-                return Integer.toHexString(setID(id));
+
+                var key = Integer.toHexString(setID(id));
+                _db.put( key.getBytes(), new byte[]{0} );
+                return key;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;

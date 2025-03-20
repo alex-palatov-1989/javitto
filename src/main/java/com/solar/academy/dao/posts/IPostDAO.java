@@ -2,6 +2,8 @@ package com.solar.academy.dao.posts;
 
 import com.solar.academy.models.posts.BasePost;
 import com.solar.academy.models.posts.FullPost;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Optional;

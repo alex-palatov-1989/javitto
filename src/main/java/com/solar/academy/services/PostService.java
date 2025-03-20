@@ -90,9 +90,9 @@ public class PostService extends SearchService{
     <T extends FullPost> ResponseEntity<?> editPost(PromoDTO req, Class<T> clazz) throws Exception {
         T item = (T)postMapper.toTemplatePost( req );
         if ( item instanceof MarketPost )
-            repository.getMarkets()  .edit((MarketPost) item, item.getKey() );
+            repository.getMarkets()  .edit((MarketPost) item, item.getId() );
         if ( item instanceof UserPost )
-            repository.getUsers()    .edit((UserPost) item, item.getKey() );
+            repository.getUsers()    .edit((UserPost) item, item.getId() );
         return ResponseEntity.ok().build();
     }
 }
