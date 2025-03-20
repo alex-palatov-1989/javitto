@@ -32,7 +32,7 @@ public class ImageRepository implements AutoCloseable{
             (data)->{
                 String key = null;  byte[] id = null;
                 try{
-                    do id = UUID.randomUUID().toString().getBytes();
+                    do id = UUID.randomUUID().toString().split("-")[0].getBytes();
                     while ( db.get(id)!=null );
                     synchronized (db) {
                         db.put( id, new byte[]{0} );

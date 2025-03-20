@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service @AllArgsConstructor
 public class ImageService {
@@ -29,14 +30,16 @@ public class ImageService {
             return ResponseEntity.internalServerError().body( e.getMessage() );
         }
     }
-    public ResponseEntity<?> post( MultipartFile img )       {
+    public ResponseEntity<?> post( MultipartFile img ) {
+        String key = null;
         try {
-            db.saveImage(img);
+            key = db.saveImage(img);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body( e.getMessage() );
         }
-        return ResponseEntity.ok().build();
+        if(Objects.isNull(key)) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok().body( key );
     }
     public ResponseEntity<?> post( List<MultipartFile> img ) {
         try {

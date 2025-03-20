@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,15 +35,22 @@ public class ImageController {
         return service.get(id);
     }
 
-    @PostMapping() @Operation(summary = "Upload photo in DB")
+    @Operation(summary = "Upload photo in DB")
+    @PostMapping(
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     ResponseEntity<?> addImage(
-            @RequestBody MultipartFile photo
+            @RequestParam("file") MultipartFile photo
     ){
         return service.post(photo);
     }
 
 
-    @PostMapping("/list") @Operation(summary = "Upload list of photos")
+    @Operation(summary = "Upload list of photos")
+    @PostMapping(
+            path = "/list",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     ResponseEntity<?> addList(
             @RequestBody MultipartFile[] photos
     ){
