@@ -16,7 +16,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository @AllArgsConstructor
 final public class PostRepository implements IPostRepository{
-    @PostConstruct void print(){
+    //@PostConstruct
+    void print(){
         System.err.println( this+String.format(
         "\n>_repository\t= %s\n>_repository\t= %s\n", users, markets)
     );}

@@ -22,7 +22,8 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings ("unchecked")
 @Repository
 final public class PostDAO {
-    @PostConstruct void print() {
+    //@PostConstruct
+    void print() {
         System.err.println(this+"\n>_cache\t= " + _db);
         System.err.println('\n');
     }

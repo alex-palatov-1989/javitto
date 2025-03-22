@@ -1,46 +1,67 @@
 package com.solar.academy.auth;
-import io.jsonwebtoken.Claims;
+
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.security.core.Authentication;
+import lombok.AllArgsConstructor;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 @Component
 public class TokenProvider {
 
-    private static final String SECRET_KEY = "your_secret_key"; // Use a secure key
-    private static final long EXPIRATION_TIME = 86400000; // 24 hours
+    @Value( "${auth.token.key}" )
+    private  String SECRET_KEY;
 
-    public String generateToken(Authentication authentication) {
-        Map<String, Object> claims = new HashMap<>();
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(authentication.getName())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-                .compact();
+    @Value( "${auth.token.time}" )
+    private  long EXPIRE_MINUTES;
+
+    public long generate(String user, String role) throws IOException {
+        var json= new JSONObject();
+        var now = new Date( System.currentTimeMillis() );
+        var exp = new Date( now.getTime() + EXPIRE_MINUTES*60*1000 );
+        var key = Integer.toHexString(
+                (int)UUID.randomUUID().getMostSignificantBits()
+        );
+        json
+            .put("key",  key) .put("user", user).put("role", role)
+            .put("EXP", exp.getTime()).put("JWT",
+                Jwts.builder().setId  ( user )
+                    .signWith(SignatureAlgorithm.HS256, key)
+                    .compact()
+            );
+        System.out.println(json.toString(4));
+        return service.put(json.toString());
+    }
+    public Jwt extractJWT(String bearer) {
+        var json = read(bearer);
+        if( json.has("key") && json.has("JWT"))
+            return Jwts.parser()
+                    .setSigningKey((String)json.get("key"))
+                    .parse( (String) json.get("JWT") );
+        else return null;
+    }
+    public boolean validate(String bearer, UserDetails user) {
+        var name = extractUsername(bearer);
+        return (name.equals(user.getUsername()) && !isTokenExpired(bearer));
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public String extractUsername(String bearer) {
+        var json = read(bearer);
+        return  json.has("user") ? (String)json.get("user") : "";
     }
-
-    public String extractUsername(String token) {
-        return extractClaims(token).getSubject();
+    public boolean isTokenExpired(String bearer) {
+        var json = read(bearer);
+        return json.has("EXP") ?
+            ( new Date( (long)json.get("EXP") ) ) .before(new Date())
+                : true;     // expired on error
     }
-
-    public Claims extractClaims(String token) {
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
-    }
-
-    public boolean isTokenExpired(String token) {
-        return extractClaims(token).getExpiration().before(new Date());
-    }
+    @Autowired JWTService service;
+    JSONObject read(String id){ return new JSONObject( service.get(id)); }
 }

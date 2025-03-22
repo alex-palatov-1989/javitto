@@ -6,9 +6,11 @@ import com.solar.academy.handlers.Comment;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
+//import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import java.util.NoSuchElementException;
 
+//@PreAuthorize( "hasRole('USER')" )
 @Service @NoArgsConstructor
 public class CommentService {
 

@@ -12,6 +12,7 @@ import com.solar.academy.dto.messages.AnswerDTO;
 import com.solar.academy.dto.messages.LetterDTO;
 import com.solar.academy.dto.messages.ReviewDTO;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.concurrent.Future;
 
 @Service
 @AllArgsConstructor
+@PreAuthorize( "hasRole('USER')" )
 public class MessagingService {
     IMessageRepository  repository;
     MessageMapper       mapper;
